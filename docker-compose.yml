@@ -1,0 +1,27 @@
+version: "2"
+
+services:
+  emitter:
+    image: emitter/server:latest
+    container_name: emitter
+    environment:
+      EMITTER_LICENSE: $EMITTER_LICENSE
+      EMITTER_TLS_HOST: $EMITTER_TLS_HOST
+      EMITTER_TLS_EMAIL: $EMITTER_TLS_EMAIL
+    ports:
+      - 8080:8080
+      - 8443:8443
+    volumes:
+      - ./emitter.conf:/root/emitter.conf:ro
+
+  openrfsense_backend:
+    image: openrfsense-backend:latest
+    container_name: orfs_backend
+    depends_on:
+      - emitter
+    environment:
+      ORFS_EMITTER_SECRET: $EMITTER_SECRET
+      ORFS_EMITTER_HOST: emitter
+      ORFS_EMITTER_PORT: "8080"
+    ports:
+      - 8081:8081

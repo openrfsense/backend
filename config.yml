@@ -1,0 +1,26 @@
+# Backend server configuration
+backend:
+  # Port on which to serve the API
+  port: 8081
+  # List of users as 'username: password' pairs for basic auth on the API endpoints
+  users:
+    openrfsense: openrfsense
+
+# External database configuration (future)
+db:
+  backend: sqlite
+  host: db.sqlite
+  database: openrfsense
+  username: openrfsense
+  password: openrfsense
+
+# Emitter MQTT broker configuration
+mqtt:
+  # Transmission protocol
+  protocol: tcp
+  # FQDN for the Emitter broker
+  host: "127.0.0.1"
+  # Port for the broker (Emitter uses 808 by default)
+  port: 8080
+  # Secret key for the emitter broker (see Emitter docs and this repo's README)
+  secret: ""

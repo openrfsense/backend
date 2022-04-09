@@ -1,0 +1,86 @@
+before:
+  hooks:
+    - go mod tidy
+    - swag init --pd -g cmd/backend/main.go -o ./docs
+    - swag fmt -d cmd/backend,api
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+builds:
+  - id: bin
+    main: ./cmd/backend
+    binary: orfs-backend
+    env:
+      - CGO_ENABLED=0
+    targets:
+      - linux_amd64
+      - linux_arm64
+      - linux_arm_7
+      - darwin_amd64
+      - darwin_arm64
+      - windows_amd64
+
+archives:
+  - replacements:
+      darwin: MacOS
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+
+nfpms:
+  - id: packages
+    bindir: /usr/bin
+    package_name: openrfsense-backend
+    homepage: https://github.com/openrfsense/backend
+    maintainer: OpenRFSense Community
+    description: |
+      OpenRFSense backend and API
+    license: AGPLv3
+    formats:
+      - deb
+    version_metadata: git
+    contents:
+      - src: config.yml
+        dst: /etc/openrfsense/config.yml
+        type: "config|noreplace"
+
+dockers:
+  - id: amd64
+    goos: linux
+    goarch: amd64
+    use: buildx
+    skip_push: "true"
+    ids: 
+      - bin
+    image_templates:
+      - openrfsense/backend:latest-amd64
+      - openrfsense/backend:v{{ .Major }}-amd64
+      - openrfsense/backend:{{ .Tag }}-amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+    extra_files:
+      - config.yml
+  - id: arm64
+    goos: linux
+    goarch: arm64
+    use: buildx
+    skip_push: "true"
+    ids: 
+      - bin
+    image_templates:
+      - openrfsense/backend:latest-arm64
+      - openrfsense/backend:v{{ .Major }}-arm64
+      - openrfsense/backend:{{ .Tag }}-arm64
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+    extra_files:
+      - config.yml

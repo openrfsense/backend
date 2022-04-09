@@ -1,0 +1,51 @@
+basePath: /api/v1
+definitions:
+  types.KeyRequest:
+    properties:
+      access:
+        type: string
+      channel:
+        type: string
+    type: object
+info:
+  contact:
+    name: OpenRFSense
+    url: https://github.com/openrfsense/backend/issues
+  description: OpenRFSense backend API
+  license:
+    name: AGPLv3
+    url: https://spdx.org/licenses/AGPL-3.0-or-later.html
+  title: OpenRFSense backend API
+  version: "0.1"
+paths:
+  /key:
+    post:
+      consumes:
+      - application/json
+      description: Returns an [Emitter channel key](https://emitter.io/develop/getting-started/)
+        for a specific channel and access mode
+      parameters:
+      - description: Channel name and access modes string
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/types.KeyRequest'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: A valid private key for the requested channel
+          schema:
+            type: string
+        "422":
+          description: ""
+        "500":
+          description: ""
+      security:
+      - BasicAuth: []
+      summary: Request an Emitter key
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

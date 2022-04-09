@@ -1,0 +1,79 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "OpenRFSense backend API",
+        "title": "OpenRFSense backend API",
+        "contact": {
+            "name": "OpenRFSense",
+            "url": "https://github.com/openrfsense/backend/issues"
+        },
+        "license": {
+            "name": "AGPLv3",
+            "url": "https://spdx.org/licenses/AGPL-3.0-or-later.html"
+        },
+        "version": "0.1"
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/key": {
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns an [Emitter channel key](https://emitter.io/develop/getting-started/) for a specific channel and access mode",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Request an Emitter key",
+                "parameters": [
+                    {
+                        "description": "Channel name and access modes string",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.KeyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A valid private key for the requested channel",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "types.KeyRequest": {
+            "type": "object",
+            "properties": {
+                "access": {
+                    "type": "string"
+                },
+                "channel": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    }
+}
