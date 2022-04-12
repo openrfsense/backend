@@ -7,7 +7,7 @@ require (
 	github.com/emitter-io/go/v2 v2.0.9
 	github.com/gofiber/fiber/v2 v2.31.0
 	github.com/gofiber/helmet/v2 v2.2.11
-	github.com/openrfsense/common v0.0.0-20220409104416-88ab5cd43be7
+	github.com/openrfsense/common v0.0.0-20220411212906-94c54c36075b
 	github.com/spf13/pflag v1.0.5
 	github.com/swaggo/swag v1.8.1
 )
@@ -45,4 +45,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

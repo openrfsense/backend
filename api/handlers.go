@@ -1,9 +1,8 @@
 package api
 
 import (
-	"log"
-
 	"github.com/gofiber/fiber/v2"
+
 	"github.com/openrfsense/backend/mqtt"
 	"github.com/openrfsense/common/keystore"
 	"github.com/openrfsense/common/types"
@@ -22,13 +21,11 @@ import (
 func KeyPost(ctx *fiber.Ctx) error {
 	keyReq := new(types.KeyRequest)
 	if err := ctx.BodyParser(keyReq); err != nil {
-		log.Println(err)
 		return err
 	}
 
 	key, err := keystore.Must(keyReq.Channel, keyReq.Access)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 

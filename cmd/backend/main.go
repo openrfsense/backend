@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	emitter "github.com/emitter-io/go/v2"
 	"github.com/gofiber/fiber/v2"
@@ -16,29 +16,30 @@ import (
 	"github.com/openrfsense/backend/mqtt"
 	"github.com/openrfsense/common/config"
 	"github.com/openrfsense/common/keystore"
+	"github.com/openrfsense/common/logging"
 )
 
 type Backend struct {
-	Port  int
-	Users map[string]string
+	Port  int               `koanf:"port"`
+	Users map[string]string `koanf:"users"`
 }
 
 type MQTT struct {
-	Protocol string
-	Host     string
-	Port     int
-	Secret   string
+	Protocol string `koanf:"protocol"`
+	Host     string `koanf:"host"`
+	Port     int    `koanf:"port"`
+	Secret   string `koanf:"secret"`
 }
 
 type BackendConfig struct {
-	Backend
-	MQTT
+	Backend `koanf:"backend"`
+	MQTT    `koanf:"mqtt"`
 }
 
 // FIXME: move elsewhere
 var DefaultConfig = BackendConfig{
 	Backend: Backend{
-		Port: 8080,
+		Port: 8081,
 	},
 	MQTT: MQTT{
 		Protocol: "tcp",
@@ -50,6 +51,11 @@ var (
 	version = ""
 	commit  = ""
 	date    = ""
+
+	log = logging.New(
+		logging.WithPrefix("main"),
+		logging.WithFlags(logging.FlagsDevelopment),
+	)
 )
 
 // @title                      OpenRFSense backend API
@@ -65,34 +71,35 @@ func main() {
 	configPath := pflag.StringP("config", "c", "config.yml", "path to yaml config file")
 	pflag.Parse()
 
-	log.Println("Loading config")
-	err := config.Load(*configPath, DefaultConfig)
+	log.Info("Loading config")
+	conf := &BackendConfig{}
+	err := config.Load(*configPath, DefaultConfig, &conf)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	docs.SwaggerInfo.Host = config.GetOrDefault("backend.host", "localhost")
 
-	log.Println("Starting keystore")
+	log.Info("Starting keystore")
 	keystore.Init(mqtt.NewBrokerRetriever(), mqtt.DefaultTTL)
 
-	log.Println("Connecting to MQTT")
-	err = mqtt.InitClient()
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Info("Connecting to MQTT")
+	mqtt.Init()
 
 	// TODO: remove these
 	mqtt.Client.OnPresence(func(_ *emitter.Client, ev emitter.PresenceEvent) {
-		log.Printf("[emitter] -> [B] %d subscriber(s) at topic '%s': %v\n", len(ev.Who), ev.Channel, ev.Who)
+		log.Debugf("[emitter] -> [B] %d subscriber(s) at topic '%s': %v\n", len(ev.Who), ev.Channel, ev.Who)
 	})
 	// mqtt.Presence("sensors/", true, false)
 	mqtt.Subscribe("sensors/+/output/", func(_ *emitter.Client, msg emitter.Message) {
-		log.Printf("[emitter] -> [B] received on specific handler: '%s' topic: '%s'\n", msg.Payload(), msg.Topic())
+		log.Debugf("[emitter] -> [B] received on specific handler: '%s' topic: '%s'\n", msg.Payload(), msg.Topic())
 	})
 
-	log.Println("Starting API")
-	router := fiber.New()
+	log.Info("Starting API")
+	router := fiber.New(fiber.Config{
+		AppName:               "openrfsense-backend",
+		DisableStartupMessage: true,
+	})
 	api.Use(router, "/api/v1")
 
 	// Graceful shutdown
@@ -103,7 +110,8 @@ func main() {
 	go func() {
 		<-c
 		router.Shutdown()
-		log.Println("Shutting down")
+		mqtt.Disconnect(time.Second)
+		log.Info("Shutting down")
 		shutdown <- struct{}{}
 	}()
 

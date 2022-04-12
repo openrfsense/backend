@@ -2,21 +2,29 @@ package mqtt
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
 	emitter "github.com/emitter-io/go/v2"
+
 	"github.com/openrfsense/common/config"
 	"github.com/openrfsense/common/keystore"
+	"github.com/openrfsense/common/logging"
 )
 
-var Client *emitter.Client
+var (
+	Client     *emitter.Client
+	DefaultTTL = 600 * time.Second
 
-var DefaultTTL = 600 * time.Second
+	log = logging.New(
+		logging.WithPrefix("mqtt"),
+		logging.WithLevel(logging.DebugLevel),
+		logging.WithFlags(logging.FlagsDevelopment),
+	)
+)
 
 // TODO: make a better init procedure and/or move to openrfsense-common
-func InitClient() error {
+func Init() {
 	brokerHost := fmt.Sprintf("%s:%d", config.Must[string]("mqtt.host"), config.Must[int]("mqtt.port"))
 	brokerUrl := url.URL{
 		Scheme: config.Get[string]("mqtt.protocol"),
@@ -36,15 +44,20 @@ func InitClient() error {
 
 	err := Client.Connect()
 	if err != nil {
-		return err
+		count := 0
+		ticker := time.NewTicker(30 * time.Second)
+		for !Client.IsConnected() && count < 5 {
+			log.Warn("Could not connect to MQTT broker, trying again")
+			<-ticker.C
+			Client.Connect()
+			count++
+		}
+		ticker.Stop()
 	}
 
 	Client.OnConnect(func(_ *emitter.Client) {
-		log.Println("Regained connection to MQTT broker")
+		log.Info("Connected to MQTT broker")
 	})
-	// Client.OnDisconnect(nil)
-
-	return nil
 }
 
 // Custom keystore.Retriever which fetches channel keys from the Emitter broker
@@ -53,7 +66,7 @@ func NewBrokerRetriever() keystore.Retriever {
 	secret := config.Get[string]("mqtt.secret")
 
 	return func(channel string, access string) (string, error) {
-		log.Printf("asking broker for channel '%s' and access '%s'", channel, access)
+		log.Debugf("asking broker for channel '%s' and access '%s'", channel, access)
 		key, err := Client.GenerateKey(secret, channel, access, int(DefaultTTL/time.Second))
 		if err != nil {
 			return "", err
