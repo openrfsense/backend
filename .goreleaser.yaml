@@ -1,21 +1,21 @@
 before:
   hooks:
     - go mod tidy
-    - swag init --pd -g cmd/backend/main.go -o ./docs
+    - swag init --pd --parseDepth 2 -g cmd/backend/main.go -o ./docs
     - swag fmt -d cmd/backend,api
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
 
 builds:
-  - id: bin
+  - id: backend
     main: ./cmd/backend
     binary: orfs-backend
     env:
@@ -27,6 +27,11 @@ builds:
       - darwin_amd64
       - darwin_arm64
       - windows_amd64
+    overrides:
+      - goos: windows
+        ldflags:
+          - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+          - -H=windowsgui
 
 archives:
   - replacements:
@@ -60,7 +65,7 @@ dockers:
     use: buildx
     skip_push: "true"
     ids: 
-      - bin
+      - backend
     image_templates:
       - openrfsense/backend:latest-amd64
       - openrfsense/backend:v{{ .Major }}-amd64
@@ -75,7 +80,7 @@ dockers:
     use: buildx
     skip_push: "true"
     ids: 
-      - bin
+      - backend
     image_templates:
       - openrfsense/backend:latest-arm64
       - openrfsense/backend:v{{ .Major }}-arm64

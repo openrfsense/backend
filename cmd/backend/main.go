@@ -52,14 +52,13 @@ var (
 	commit  = ""
 	date    = ""
 
-	log = logging.New(
-		logging.WithPrefix("main"),
-		logging.WithFlags(logging.FlagsDevelopment),
-	)
+	log = logging.New().
+		WithPrefix("main").
+		WithLevel(logging.DebugLevel).
+		WithFlags(logging.FlagsDevelopment)
 )
 
 // @title                      OpenRFSense backend API
-// @version                    0.1
 // @description                OpenRFSense backend API
 // @contact.name               OpenRFSense
 // @contact.url                https://github.com/openrfsense/backend/issues
@@ -79,6 +78,7 @@ func main() {
 	}
 
 	docs.SwaggerInfo.Host = config.GetOrDefault("backend.host", "localhost")
+	docs.SwaggerInfo.Version = version
 
 	log.Info("Starting keystore")
 	keystore.Init(mqtt.NewBrokerRetriever(), mqtt.DefaultTTL)
@@ -87,12 +87,15 @@ func main() {
 	mqtt.Init()
 
 	// TODO: remove these
-	mqtt.Client.OnPresence(func(_ *emitter.Client, ev emitter.PresenceEvent) {
+	mqtt.Client().OnPresence(func(_ *emitter.Client, ev emitter.PresenceEvent) {
 		log.Debugf("[emitter] -> [B] %d subscriber(s) at topic '%s': %v\n", len(ev.Who), ev.Channel, ev.Who)
 	})
-	// mqtt.Presence("sensors/", true, false)
-	mqtt.Subscribe("sensors/+/output/", func(_ *emitter.Client, msg emitter.Message) {
-		log.Debugf("[emitter] -> [B] received on specific handler: '%s' topic: '%s'\n", msg.Payload(), msg.Topic())
+	// mqtt.Presence("node/", true, false)
+	// mqtt.Subscribe("node/+/output/", func(_ *emitter.Client, msg emitter.Message) {
+	// 	log.Debugf("[emitter] -> [B] received on specific handler: '%s' topic: '%s'\n", msg.Payload(), msg.Topic())
+	// })
+	mqtt.Subscribe("node/all/", func(_ *emitter.Client, msg emitter.Message) {
+		log.Debugf("[emitter] -> [B] received on specific handler: '%s' topic: '%s'", msg.Payload(), msg.Topic())
 	})
 
 	log.Info("Starting API")

@@ -18,14 +18,17 @@ import (
 var swaggerConfig = swagger.Config{
 	Title:  "Swagger UI",
 	Layout: "BaseLayout",
+	Plugins: []template.JS{
+		template.JS("SwaggerUIBundle.plugins.DownloadUrl"),
+	},
 	Presets: []template.JS{
 		template.JS("SwaggerUIBundle.presets.apis"),
 		template.JS("SwaggerUIStandalonePreset"),
 	},
 	DeepLinking:              true,
-	DefaultModelsExpandDepth: 1,
-	DefaultModelExpandDepth:  1,
-	DefaultModelRendering:    "example",
+	DefaultModelsExpandDepth: 2,
+	DefaultModelExpandDepth:  2,
+	DefaultModelRendering:    "model",
 	DocExpansion:             "list",
 	SyntaxHighlight: &swagger.SyntaxHighlightConfig{
 		Activate: true,
@@ -54,7 +57,8 @@ func Use(router *fiber.App, prefix string) {
 			Users: creds,
 		}))
 		router.Post("/key", KeyPost)
-		router.Get("/list", ListGet)
+		router.Get("/nodes", ListGet)
+		router.Get("/nodes/:id/stats", NodeStatsGet)
 	})
 
 	// Setup documentation routes

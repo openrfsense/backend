@@ -10,8 +10,7 @@
         "license": {
             "name": "AGPLv3",
             "url": "https://spdx.org/licenses/AGPL-3.0-or-later.html"
-        },
-        "version": "0.1"
+        }
     },
     "basePath": "/api/v1",
     "paths": {
@@ -22,12 +21,15 @@
                         "BasicAuth": []
                     }
                 ],
-                "description": "Returns an [Emitter channel key](https://emitter.io/develop/getting-started/) for a specific channel and access mode",
+                "description": "Returns an [Emitter channel key](https://emitter.io/develop/getting-started/) for a specific channel and access mode.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "text/plain"
+                ],
+                "tags": [
+                    "internal"
                 ],
                 "summary": "Request an Emitter key",
                 "parameters": [
@@ -49,16 +51,101 @@
                         }
                     },
                     "422": {
-                        "description": ""
+                        "description": "When the request JSON is malformed"
                     },
                     "500": {
-                        "description": ""
+                        "description": "When the kestore cannot retrieve the key"
+                    }
+                }
+            }
+        },
+        "/nodes": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns a list of all connected nodes by their hardware ID. Will time out in 500ms if any one of the nodes does not respond.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nodes"
+                ],
+                "summary": "List nodes",
+                "responses": {
+                    "200": {
+                        "description": "Bare statistics for all the running and connected nodes",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/stats.Stats"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "When the internal timeout for information retrieval expires"
+                    }
+                }
+            }
+        },
+        "/nodes/{id}/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns full stats from the node with given hardware ID. Will time out in 500ms the node does not respond.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nodes"
+                ],
+                "summary": "Get stats from a node",
+                "responses": {
+                    "200": {
+                        "description": "Bare statistics for the node associated to the given ID",
+                        "schema": {
+                            "$ref": "#/definitions/stats.Stats"
+                        }
+                    },
+                    "500": {
+                        "description": "When the internal timeout for information retrieval expires"
                     }
                 }
             }
         }
     },
     "definitions": {
+        "stats.Stats": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "description": "Hostname of the system",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "A unique identifier for the node (a hardware-bound ID is recommended)",
+                    "type": "string"
+                },
+                "model": {
+                    "description": "The model/vendor of the system's hardware, useful for identification",
+                    "type": "string"
+                },
+                "providers": {
+                    "description": "Extra, more in-depth information about the system as dynamically returned by providers.",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "uptime": {
+                    "description": "Uptime of the system",
+                    "type": "integer"
+                }
+            }
+        },
         "types.KeyRequest": {
             "type": "object",
             "properties": {

@@ -7,7 +7,7 @@ require (
 	github.com/emitter-io/go/v2 v2.0.9
 	github.com/gofiber/fiber/v2 v2.31.0
 	github.com/gofiber/helmet/v2 v2.2.11
-	github.com/openrfsense/common v0.0.0-20220411212906-94c54c36075b
+	github.com/openrfsense/common v0.0.0-20220421185327-afb807dbda35
 	github.com/spf13/pflag v1.0.5
 	github.com/swaggo/swag v1.8.1
 )
@@ -33,7 +33,7 @@ require (
 	github.com/knadh/koanf v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
-	github.com/mitchellh/mapstructure v1.4.3 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 // indirect
