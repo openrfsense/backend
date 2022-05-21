@@ -1,21 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	emitter "github.com/emitter-io/go/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/pflag"
 
 	"github.com/openrfsense/backend/api"
 	"github.com/openrfsense/backend/docs"
-	"github.com/openrfsense/backend/mqtt"
+	"github.com/openrfsense/backend/nats"
 	"github.com/openrfsense/common/config"
-	"github.com/openrfsense/common/keystore"
 	"github.com/openrfsense/common/logging"
 )
 
@@ -71,8 +68,7 @@ func main() {
 	pflag.Parse()
 
 	log.Info("Loading config")
-	conf := &BackendConfig{}
-	err := config.Load(*configPath, DefaultConfig, &conf)
+	err := config.Load(*configPath, DefaultConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,48 +76,22 @@ func main() {
 	docs.SwaggerInfo.Host = config.GetOrDefault("backend.host", "localhost")
 	docs.SwaggerInfo.Version = version
 
-	log.Info("Starting keystore")
-	keystore.Init(mqtt.NewBrokerRetriever(), mqtt.DefaultTTL)
-
-	log.Info("Connecting to MQTT")
-	mqtt.Init()
-
-	// TODO: remove these
-	mqtt.Client().OnPresence(func(_ *emitter.Client, ev emitter.PresenceEvent) {
-		log.Debugf("[emitter] -> [B] %d subscriber(s) at topic '%s': %v\n", len(ev.Who), ev.Channel, ev.Who)
-	})
-	// mqtt.Presence("node/", true, false)
-	// mqtt.Subscribe("node/+/output/", func(_ *emitter.Client, msg emitter.Message) {
-	// 	log.Debugf("[emitter] -> [B] received on specific handler: '%s' topic: '%s'\n", msg.Payload(), msg.Topic())
-	// })
-	mqtt.Subscribe("node/all/", func(_ *emitter.Client, msg emitter.Message) {
-		log.Debugf("[emitter] -> [B] received on specific handler: '%s' topic: '%s'", msg.Payload(), msg.Topic())
-	})
+	log.Info("Starting NATS server")
+	err = nats.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer nats.Disconnect()
 
 	log.Info("Starting API")
-	router := fiber.New(fiber.Config{
+	router := api.Start("/api/v1", fiber.Config{
 		AppName:               "openrfsense-backend",
 		DisableStartupMessage: true,
 	})
-	api.Use(router, "/api/v1")
+	defer router.Shutdown()
 
-	// Graceful shutdown
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	shutdown := make(chan struct{})
-
-	go func() {
-		<-c
-		router.Shutdown()
-		mqtt.Disconnect(time.Second)
-		log.Info("Shutting down")
-		shutdown <- struct{}{}
-	}()
-
-	addr := fmt.Sprintf(":%d", config.Get[int]("backend.port"))
-	if err := router.Listen(addr); err != nil {
-		log.Fatal(err)
-	}
-
-	<-shutdown
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+	<-ctx.Done()
+	log.Info("Shutting down")
 }

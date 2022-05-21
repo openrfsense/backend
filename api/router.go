@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"html/template"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
@@ -13,7 +14,13 @@ import (
 
 	_ "github.com/openrfsense/backend/docs"
 	"github.com/openrfsense/common/config"
+	"github.com/openrfsense/common/logging"
 )
+
+var log = logging.New().
+	WithPrefix("api").
+	WithLevel(logging.DebugLevel).
+	WithFlags(logging.FlagsDevelopment)
 
 var swaggerConfig = swagger.Config{
 	Title:  "Swagger UI",
@@ -39,10 +46,12 @@ var swaggerConfig = swagger.Config{
 	SupportedSubmitMethods: []string{},
 }
 
-// Configure a router for the public API. Initializes all REST endpoints under the given prefix
+// Create a router for the public API. Initializes all REST endpoints under the given prefix
 // and servers swagger documentation on /swagger.
-func Use(router *fiber.App, prefix string) {
+func Start(prefix string, routerConfig ...fiber.Config) *fiber.App {
 	creds := config.MustMap[string, string]("backend.users")
+
+	router := fiber.New(routerConfig...)
 
 	// TODO: rate limiting?
 	router.Use(
@@ -66,4 +75,14 @@ func Use(router *fiber.App, prefix string) {
 		return c.Redirect("/swagger/index.html")
 	})
 	router.Get("/swagger/*", swagger.New(swaggerConfig))
+
+	addr := fmt.Sprintf(":%d", config.GetWeakInt("backend.port"))
+
+	go func() {
+		if err := router.Listen(addr); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	return router
 }

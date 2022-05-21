@@ -2,24 +2,18 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	emitter "github.com/emitter-io/go/v2"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/openrfsense/backend/mqtt"
+	"github.com/openrfsense/backend/nats"
 	"github.com/openrfsense/common/keystore"
-	"github.com/openrfsense/common/logging"
 	"github.com/openrfsense/common/stats"
 	"github.com/openrfsense/common/types"
 )
-
-var log = logging.New().
-	WithPrefix("handlers").WithLevel(logging.DebugLevel)
 
 // @summary      Request an Emitter key
 // @description  Returns an [Emitter channel key](https://emitter.io/develop/getting-started/) for a specific channel and access mode.
@@ -52,7 +46,7 @@ func KeyPost(ctx *fiber.Ctx) error {
 }
 
 // @summary      List nodes
-// @description  Returns a list of all connected nodes by their hardware ID. Will time out in 500ms if any one of the nodes does not respond.
+// @description  Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.
 // @tags         nodes
 // @security     BasicAuth
 // @produce      json
@@ -60,30 +54,31 @@ func KeyPost(ctx *fiber.Ctx) error {
 // @failure      500  "When the internal timeout for information retrieval expires"
 // @router       /nodes [get]
 func ListGet(ctx *fiber.Ctx) error {
-	nodes := 0
-	mqtt.Client().OnPresence(func(_ *emitter.Client, pe emitter.PresenceEvent) {
-		log.Debugf("counted %d nodes", len(pe.Who))
-		nodes = len(pe.Who)
-	})
-	err := mqtt.Presence("node/get/all/", true, false)
+	nodes, err := nats.Presence("node.all")
 	if err != nil {
 		return err
 	}
 
-	c, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	defer cancel()
-
+	// Listen for responses on node.get.all (arbitrary)
 	statsChan := make(chan stats.Stats)
-	mqtt.Get("/all/", func(_ *emitter.Client, m emitter.Message) {
-		var s stats.Stats
-		if len(m.Payload()) == 0 {
-			return
-		}
-
-		json.Unmarshal(m.Payload(), &s)
-		statsChan <- s
+	sub, err := nats.Conn().Subscribe("node.get.all", func(s *stats.Stats) {
+		statsChan <- *s
 	})
+	defer sub.Unsubscribe()
 
+	// Request stats with timeout
+	err = nats.Conn().PublishRequest("node.all", "node.get.all", "")
+	if err != nil {
+		return err
+	}
+	err = nats.Conn().FlushTimeout(300 * time.Millisecond)
+	if err != nil {
+		return err
+	}
+
+	// Collect received stats with timeout
+	c, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
 	statsAll := make([]stats.Stats, 0, nodes)
 	for i := 0; i < nodes; i++ {
 		select {
@@ -99,11 +94,11 @@ func ListGet(ctx *fiber.Ctx) error {
 }
 
 // @summary      Get stats from a node
-// @description  Returns full stats from the node with given hardware ID. Will time out in 500ms the node does not respond.
+// @description  Returns full stats from the node with given hardware ID. Will time out in 300ms the node does not respond.
 // @tags         nodes
 // @security     BasicAuth
 // @produce      json
-// @success      200  {object}  stats.Stats  "Bare statistics for the node associated to the given ID"
+// @success      200  {object}  stats.Stats  "Full system statistics for the node associated to the given ID"
 // @failure      500  "When the internal timeout for information retrieval expires"
 // @router       /nodes/{id}/stats [get]
 func NodeStatsGet(ctx *fiber.Ctx) error {
@@ -112,26 +107,12 @@ func NodeStatsGet(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(http.StatusBadRequest)
 	}
 
-	c, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	defer cancel()
-
-	statsChan := make(chan stats.Stats)
-	channel := fmt.Sprintf("%s/stats", strings.Trim(id, "/"))
-	mqtt.Get(channel, func(_ *emitter.Client, m emitter.Message) {
-		var s stats.Stats
-		if len(m.Payload()) == 0 {
-			return
-		}
-
-		json.Unmarshal(m.Payload(), &s)
-		statsChan <- s
-	})
-
-	select {
-	case p := <-statsChan:
-		return ctx.JSON(p)
-	case <-c.Done():
-		log.Error("NodeStatsGet timed out")
-		return ctx.SendStatus(http.StatusInternalServerError)
+	stat := stats.Stats{}
+	channel := fmt.Sprintf("node.%s.stats", strings.Trim(id, "."))
+	err := nats.Conn().Request(channel, "", &stat, 300*time.Millisecond)
+	if err != nil {
+		return err
 	}
+
+	return ctx.JSON(stat)
 }
