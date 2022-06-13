@@ -23,51 +23,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/key": {
-            "post": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Returns an [Emitter channel key](https://emitter.io/develop/getting-started/) for a specific channel and access mode.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "internal"
-                ],
-                "summary": "Request an Emitter key",
-                "parameters": [
-                    {
-                        "description": "Channel name and access modes string",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.KeyRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "A valid private key for the requested channel",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "422": {
-                        "description": "When the request JSON is malformed"
-                    },
-                    "500": {
-                        "description": "When the kestore cannot retrieve the key"
-                    }
-                }
-            }
-        },
         "/nodes": {
             "get": {
                 "security": [
@@ -75,7 +30,7 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
-                "description": "Returns a list of all connected nodes by their hardware ID. Will time out in 500ms if any one of the nodes does not respond.",
+                "description": "Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.",
                 "produces": [
                     "application/json"
                 ],
@@ -106,7 +61,7 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
-                "description": "Returns full stats from the node with given hardware ID. Will time out in 500ms the node does not respond.",
+                "description": "Returns full stats from the node with given hardware ID. Will time out in ` + "`" + `300ms` + "`" + ` if the node does not respond.",
                 "produces": [
                     "application/json"
                 ],
@@ -114,9 +69,18 @@ const docTemplate = `{
                     "nodes"
                 ],
                 "summary": "Get stats from a node",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Node hardware ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Bare statistics for the node associated to the given ID",
+                        "description": "Full system statistics for the node associated to the given ID",
                         "schema": {
                             "$ref": "#/definitions/stats.Stats"
                         }
@@ -152,17 +116,6 @@ const docTemplate = `{
                 "uptime": {
                     "description": "Uptime of the system",
                     "type": "integer"
-                }
-            }
-        },
-        "types.KeyRequest": {
-            "type": "object",
-            "properties": {
-                "access": {
-                    "type": "string"
-                },
-                "channel": {
-                    "type": "string"
                 }
             }
         }

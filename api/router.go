@@ -41,9 +41,10 @@ var swaggerConfig = swagger.Config{
 		Activate: true,
 		Theme:    "agate",
 	},
+	ShowCommonExtensions:   true,
 	ShowMutatedRequest:     true,
-	TryItOutEnabled:        false,
 	SupportedSubmitMethods: []string{},
+	TryItOutEnabled:        false,
 }
 
 // Create a router for the public API. Initializes all REST endpoints under the given prefix
@@ -71,10 +72,10 @@ func Start(prefix string, routerConfig ...fiber.Config) *fiber.App {
 	})
 
 	// Setup documentation routes
-	router.Get("/swagger", func(c *fiber.Ctx) error {
-		return c.Redirect("/swagger/index.html")
+	router.Get("/api/docs", func(c *fiber.Ctx) error {
+		return c.Redirect("/api/docs/index.html")
 	})
-	router.Get("/swagger/*", swagger.New(swaggerConfig))
+	router.Get("/api/docs/*", swagger.New(swaggerConfig))
 
 	addr := fmt.Sprintf(":%d", config.GetWeakInt("backend.port"))
 

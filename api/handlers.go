@@ -10,39 +10,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/openrfsense/backend/nats"
-	"github.com/openrfsense/common/keystore"
 	"github.com/openrfsense/common/stats"
-	"github.com/openrfsense/common/types"
 )
 
-// @summary      Request an Emitter key
-// @description  Returns an [Emitter channel key](https://emitter.io/develop/getting-started/) for a specific channel and access mode.
-// @tags         internal
-// @security     BasicAuth
-// @accept       json
-// @produce      plain
-// @param        message  body      types.KeyRequest  true  "Channel name and access modes string"
-// @success      200      {string}  string            "A valid private key for the requested channel"
-// @failure      422      "When the request JSON is malformed"
-// @failure      500      "When the kestore cannot retrieve the key"
-// @router       /key [post]
 func KeyPost(ctx *fiber.Ctx) error {
-	keyReq := new(types.KeyRequest)
-	if err := ctx.BodyParser(keyReq); err != nil {
-		return err
-	}
-
-	// TODO: move validation elsewhere
-	if keyReq.Access == "" || keyReq.Channel == "" {
-		return ctx.SendStatus(http.StatusUnprocessableEntity)
-	}
-
-	key, err := keystore.Must(keyReq.Channel, keyReq.Access)
-	if err != nil {
-		return err
-	}
-
-	return ctx.SendString(key)
+	return ctx.SendStatus(http.StatusTeapot)
 }
 
 // @summary      List nodes
@@ -94,10 +66,11 @@ func ListGet(ctx *fiber.Ctx) error {
 }
 
 // @summary      Get stats from a node
-// @description  Returns full stats from the node with given hardware ID. Will time out in 300ms the node does not respond.
+// @description  Returns full stats from the node with given hardware ID. Will time out in `300ms` if the node does not respond.
 // @tags         nodes
 // @security     BasicAuth
 // @produce      json
+// @param        id   path      string       true  "Node hardware ID"
 // @success      200  {object}  stats.Stats  "Full system statistics for the node associated to the given ID"
 // @failure      500  "When the internal timeout for information retrieval expires"
 // @router       /nodes/{id}/stats [get]

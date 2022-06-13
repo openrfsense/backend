@@ -20,13 +20,6 @@ definitions:
         description: Uptime of the system
         type: integer
     type: object
-  types.KeyRequest:
-    properties:
-      access:
-        type: string
-      channel:
-        type: string
-    type: object
 info:
   contact:
     name: OpenRFSense
@@ -37,39 +30,10 @@ info:
     url: https://spdx.org/licenses/AGPL-3.0-or-later.html
   title: OpenRFSense backend API
 paths:
-  /key:
-    post:
-      consumes:
-      - application/json
-      description: Returns an [Emitter channel key](https://emitter.io/develop/getting-started/)
-        for a specific channel and access mode.
-      parameters:
-      - description: Channel name and access modes string
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/types.KeyRequest'
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: A valid private key for the requested channel
-          schema:
-            type: string
-        "422":
-          description: When the request JSON is malformed
-        "500":
-          description: When the kestore cannot retrieve the key
-      security:
-      - BasicAuth: []
-      summary: Request an Emitter key
-      tags:
-      - internal
   /nodes:
     get:
       description: Returns a list of all connected nodes by their hardware ID. Will
-        time out in 500ms if any one of the nodes does not respond.
+        time out in 300ms if any one of the nodes does not respond.
       produces:
       - application/json
       responses:
@@ -89,12 +53,19 @@ paths:
   /nodes/{id}/stats:
     get:
       description: Returns full stats from the node with given hardware ID. Will time
-        out in 500ms the node does not respond.
+        out in `300ms` if the node does not respond.
+      parameters:
+      - description: Node hardware ID
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Bare statistics for the node associated to the given ID
+          description: Full system statistics for the node associated to the given
+            ID
           schema:
             $ref: '#/definitions/stats.Stats'
         "500":
