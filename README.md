@@ -58,7 +58,7 @@ See the example [`config.yml`](./config.yml) file for now, as the configuration 
 #### Environment variables
 Environment variables are defined as follows: `ORFS_SECTION_SUBSECTION_KEY=value`. They are loaded after any other configuration file, so they cam be used to overwrite any configuration value.
 
-For example, it's recommended to set `mqtt.secret` (the MQTT broker secret key, see [Emitter documentation](https://emitter.io/develop/getting-started/) under **Channel Security**) as an envionment variable: `ORFS_MQTT_SECRET=key`.
+For example, it's recommended to set `nats.token` (the NATS server access token for API calls, see [NATS documentation](https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/tokens)) as an envionment variable: `ORFS_NATS_TOKEN=token`.
 
 ### API
 The backend will automatically generate its own [Swagger](https://swagger.io/) documentation and serve a webpage with [Swagger UI](https://swagger.io/tools/swagger-ui/) at `https://$DOMAIN/api/docs`. The common JSON objects are defined as Golang structs in [`openrfsense/common.types`](https://github.com/openrfsense/common).
