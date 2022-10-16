@@ -11,20 +11,19 @@ import (
 
 	"github.com/openrfsense/backend/nats"
 	"github.com/openrfsense/common/stats"
+	"github.com/openrfsense/common/types"
 )
 
-func KeyPost(ctx *fiber.Ctx) error {
-	return ctx.SendStatus(http.StatusTeapot)
-}
-
-// @summary      List nodes
-// @description  Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.
-// @tags         nodes
-// @security     BasicAuth
-// @produce      json
-// @success      200  {array}  stats.Stats  "Bare statistics for all the running and connected nodes"
-// @failure      500  "When the internal timeout for information retrieval expires"
-// @router       /nodes [get]
+// List nodes
+//
+// @summary     List nodes
+// @description Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.
+// @tags        nodes
+// @security    BasicAuth
+// @produce     json
+// @success     200 {array} stats.Stats "Bare statistics for all the running and connected nodes"
+// @failure     500 "When the internal timeout for information retrieval expires"
+// @router      /nodes [get]
 func ListGet(ctx *fiber.Ctx) error {
 	nodes, err := nats.Presence("node.all")
 	if err != nil {
@@ -37,6 +36,9 @@ func ListGet(ctx *fiber.Ctx) error {
 		statsChan <- *s
 	})
 	defer sub.Unsubscribe()
+	if err != nil {
+		return err
+	}
 
 	// Request stats with timeout
 	err = nats.Conn().PublishRequest("node.all", "node.get.all", "")
@@ -65,15 +67,17 @@ func ListGet(ctx *fiber.Ctx) error {
 	return ctx.JSON(statsAll)
 }
 
-// @summary      Get stats from a node
-// @description  Returns full stats from the node with given hardware ID. Will time out in `300ms` if the node does not respond.
-// @tags         nodes
-// @security     BasicAuth
-// @produce      json
-// @param        id   path      string       true  "Node hardware ID"
-// @success      200  {object}  stats.Stats  "Full system statistics for the node associated to the given ID"
-// @failure      500  "When the internal timeout for information retrieval expires"
-// @router       /nodes/{id}/stats [get]
+// Get stats from a node
+//
+// @summary     Get stats from a node
+// @description Returns full stats from the node with given hardware ID. Will time out in `300ms` if the node does not respond.
+// @tags        nodes
+// @security    BasicAuth
+// @param       id path string true "Node hardware ID"
+// @produce     json
+// @success     200 {object} stats.Stats "Full system statistics for the node associated to the given ID"
+// @failure     500 "When the internal timeout for information retrieval expires"
+// @router      /nodes/{id}/stats [get]
 func NodeStatsGet(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	if id == "" {
@@ -88,4 +92,63 @@ func NodeStatsGet(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(stat)
+}
+
+// Starts a measurement on a node and returns an aggregated spectrum measurement
+//
+// @summary     Get an aggregated spectrum measurement from a list of nodes
+// @description Sends an aggregated measurement request to the nodes specified in `sensors` and returns a list of `stats.Stats` objects for all sensors taking part in the campaign. Will time out in `300ms` if any sensor does not respond.
+// @tags        nodes
+// @security    BasicAuth
+// @param       id body types.AggregatedMeasurementRequest true "Measurement request object"
+// @produce     json
+// @success     200 {array} stats.Stats "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information."
+// @failure     500 "When the internal timeout for information retrieval expires"
+// @router      /nodes/{id}/aggregated [post]
+func NodeAggregatedPost(ctx *fiber.Ctx) error {
+	nodes, err := nats.Presence("node.all.aggregated")
+	if err != nil {
+		return err
+	}
+
+	// Listen for responses on node.get.all.aggregated (arbitrary)
+	statsChan := make(chan stats.Stats)
+	sub, err := nats.Conn().Subscribe("node.get.all.aggregated", func(s *stats.Stats) {
+		statsChan <- *s
+	})
+	defer sub.Unsubscribe()
+	if err != nil {
+		return err
+	}
+
+	amr := types.AggregatedMeasurementRequest{}
+	err = ctx.BodyParser(&amr)
+	if err != nil {
+		return err
+	}
+
+	err = nats.Conn().PublishRequest("node.all.aggregated", "node.get.all.aggregated", amr)
+	if err != nil {
+		return err
+	}
+	err = nats.Conn().FlushTimeout(300 * time.Millisecond)
+	if err != nil {
+		return err
+	}
+
+	// Collect received stats with timeout
+	c, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
+	statsAll := make([]stats.Stats, 0, nodes)
+	for i := 0; i < nodes; i++ {
+		select {
+		case p := <-statsChan:
+			statsAll = append(statsAll, p)
+		case <-c.Done():
+			log.Error("NodeAggregated timed out")
+			return ctx.SendStatus(http.StatusInternalServerError)
+		}
+	}
+
+	return ctx.JSON(statsAll)
 }

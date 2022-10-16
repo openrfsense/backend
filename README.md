@@ -1,6 +1,6 @@
 # OpenRFSense Backend
 The backend is responsible for:
-- controlling and querying the sensors remotely via MQTT
+- controlling and querying the sensors remotely via NATS
 - managing encryption keys and TLS certificates for secure communication with the sensors
 - exposing a RESTful API to fetch data and provide an abstraction layer over the sensors control
 
@@ -8,8 +8,6 @@ The backend is responsible for:
 - [OpenRFSense Backend](#openrfsense-backend)
     - [Usage and deployment](#usage-and-deployment)
     - [Configuration](#configuration)
-      - [YAML](#yaml)
-      - [Environment variables](#environment-variables)
     - [API](#api)
 
 ### Usage and deployment
@@ -18,6 +16,7 @@ Docker has become the industry standard nowadays, so an official Docker image is
 A reverse proxy is also recommended: something like [Caddy](https://caddyserver.com/) is simple to use and has automatic TLS among other nice features.
 
 Docker Compose can also be used to manage your infrastructure with Caddy. An example `docker-compose.yml` would look like this:
+> Please not that this is just **an example** of configuration for an external project and, as such, not guaranteed to be future-proof or maintained as-is.
 <!-- TODO: add TLS docs for embedded NATS -->
 ```yaml
 services:

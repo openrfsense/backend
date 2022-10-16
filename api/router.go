@@ -66,9 +66,9 @@ func Start(prefix string, routerConfig ...fiber.Config) *fiber.App {
 		router.Use(basicauth.New(basicauth.Config{
 			Users: creds,
 		}))
-		router.Post("/key", KeyPost)
 		router.Get("/nodes", ListGet)
 		router.Get("/nodes/:id/stats", NodeStatsGet)
+		router.Post("/aggregated", NodeAggregatedPost)
 	})
 
 	// Setup documentation routes

@@ -45,6 +45,48 @@
                 }
             }
         },
+        "/nodes/{id}/aggregated": {
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Sends an aggregated measurement request to the nodes specified in `sensors` and returns a list of `stats.Stats` objects for all sensors taking part in the campaign. Will time out in `300ms` if any sensor does not respond.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nodes"
+                ],
+                "summary": "Get an aggregated spectrum measurement from a list of nodes",
+                "parameters": [
+                    {
+                        "description": "Measurement request object",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.AggregatedMeasurementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bare statistics for all nodes in the measurement campaign",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/stats.Stats"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "When the internal timeout for information retrieval expires"
+                    }
+                }
+            }
+        },
         "/nodes/{id}/stats": {
             "get": {
                 "security": [
@@ -106,6 +148,42 @@
                 },
                 "uptime": {
                     "description": "Uptime of the system",
+                    "type": "integer"
+                }
+            }
+        },
+        "types.AggregatedMeasurementRequest": {
+            "type": "object",
+            "properties": {
+                "begin": {
+                    "description": "Start time in milliseconds since epoch (Unix time)",
+                    "type": "integer"
+                },
+                "end": {
+                    "description": "End time in milliseconds since epoch (Unix time)",
+                    "type": "integer"
+                },
+                "freqMax": {
+                    "description": "Upper bound for frequency in Hz",
+                    "type": "integer"
+                },
+                "freqMin": {
+                    "description": "Lower bound for frequency in Hz",
+                    "type": "integer"
+                },
+                "freqRes": {
+                    "description": "Frequency resolution in Hz",
+                    "type": "integer"
+                },
+                "sensors": {
+                    "description": "List of sensor hardware IDs to run the measurement campaign on",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "timeRes": {
+                    "description": "Time resolution in seconds",
                     "type": "integer"
                 }
             }
