@@ -24,10 +24,10 @@ func createClientConnSubscribeAndPublish(t *testing.T, s *server.Server, subject
 	if err != nil {
 		t.Fatalf("Error subscribing to `%s`: %v\n", inbox, err)
 	}
-	nc.Publish(inbox, []byte("Hello"))
+	_ = nc.Publish(inbox, []byte("Hello"))
 
 	for _, s := range subjects {
-		nc.Publish(s, []byte("Hello"))
+		_ = nc.Publish(s, []byte("Hello"))
 	}
 
 	if nc.LastError() != nil {
@@ -36,7 +36,7 @@ func createClientConnSubscribeAndPublish(t *testing.T, s *server.Server, subject
 
 	// Wait for message
 	<-ch
-	sub.Unsubscribe()
+	_ = sub.Unsubscribe()
 	close(ch)
 	nc.Flush()
 	return nc

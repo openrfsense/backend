@@ -76,6 +76,7 @@ paths:
       summary: List nodes
       tags:
       - nodes
+      - administration
   /nodes/{id}/aggregated:
     post:
       description: Sends an aggregated measurement request to the nodes specified
@@ -92,7 +93,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: Bare statistics for all nodes in the measurement campaign
+          description: Bare statistics for all nodes in the measurement campaign.
+            Will always include sensor status information.
           schema:
             items:
               $ref: '#/definitions/stats.Stats'
@@ -104,6 +106,7 @@ paths:
       summary: Get an aggregated spectrum measurement from a list of nodes
       tags:
       - nodes
+      - measurement
   /nodes/{id}/stats:
     get:
       description: Returns full stats from the node with given hardware ID. Will time
@@ -129,6 +132,7 @@ paths:
       summary: Get stats from a node
       tags:
       - nodes
+      - administration
 securityDefinitions:
   BasicAuth:
     type: basic

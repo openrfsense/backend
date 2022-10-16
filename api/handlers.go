@@ -18,7 +18,7 @@ import (
 //
 // @summary     List nodes
 // @description Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.
-// @tags        nodes
+// @tags        nodes,administration
 // @security    BasicAuth
 // @produce     json
 // @success     200 {array} stats.Stats "Bare statistics for all the running and connected nodes"
@@ -35,7 +35,12 @@ func ListGet(ctx *fiber.Ctx) error {
 	sub, err := nats.Conn().Subscribe("node.get.all", func(s *stats.Stats) {
 		statsChan <- *s
 	})
-	defer sub.Unsubscribe()
+	defer func() {
+		err = sub.Unsubscribe()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 	if err != nil {
 		return err
 	}
@@ -71,7 +76,7 @@ func ListGet(ctx *fiber.Ctx) error {
 //
 // @summary     Get stats from a node
 // @description Returns full stats from the node with given hardware ID. Will time out in `300ms` if the node does not respond.
-// @tags        nodes
+// @tags        nodes,administration
 // @security    BasicAuth
 // @param       id path string true "Node hardware ID"
 // @produce     json
@@ -98,7 +103,7 @@ func NodeStatsGet(ctx *fiber.Ctx) error {
 //
 // @summary     Get an aggregated spectrum measurement from a list of nodes
 // @description Sends an aggregated measurement request to the nodes specified in `sensors` and returns a list of `stats.Stats` objects for all sensors taking part in the campaign. Will time out in `300ms` if any sensor does not respond.
-// @tags        nodes
+// @tags        nodes,measurement
 // @security    BasicAuth
 // @param       id body types.AggregatedMeasurementRequest true "Measurement request object"
 // @produce     json
@@ -106,23 +111,26 @@ func NodeStatsGet(ctx *fiber.Ctx) error {
 // @failure     500 "When the internal timeout for information retrieval expires"
 // @router      /nodes/{id}/aggregated [post]
 func NodeAggregatedPost(ctx *fiber.Ctx) error {
-	nodes, err := nats.Presence("node.all.aggregated")
+	amr := types.AggregatedMeasurementRequest{}
+	err := ctx.BodyParser(&amr)
 	if err != nil {
 		return err
 	}
+
+	// How many nodes the handler should wait for, so the number of requested sensors
+	nodes := len(amr.Sensors)
 
 	// Listen for responses on node.get.all.aggregated (arbitrary)
 	statsChan := make(chan stats.Stats)
 	sub, err := nats.Conn().Subscribe("node.get.all.aggregated", func(s *stats.Stats) {
 		statsChan <- *s
 	})
-	defer sub.Unsubscribe()
-	if err != nil {
-		return err
-	}
-
-	amr := types.AggregatedMeasurementRequest{}
-	err = ctx.BodyParser(&amr)
+	defer func() {
+		err = sub.Unsubscribe()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 	if err != nil {
 		return err
 	}

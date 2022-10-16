@@ -35,7 +35,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nodes"
+                    "nodes",
+                    "administration"
                 ],
                 "summary": "List nodes",
                 "responses": {
@@ -66,7 +67,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nodes"
+                    "nodes",
+                    "measurement"
                 ],
                 "summary": "Get an aggregated spectrum measurement from a list of nodes",
                 "parameters": [
@@ -82,7 +84,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Bare statistics for all nodes in the measurement campaign",
+                        "description": "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information.",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -108,7 +110,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nodes"
+                    "nodes",
+                    "administration"
                 ],
                 "summary": "Get stats from a node",
                 "parameters": [

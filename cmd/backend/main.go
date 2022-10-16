@@ -95,7 +95,12 @@ func main() {
 		AppName:               "openrfsense-backend",
 		DisableStartupMessage: true,
 	})
-	defer router.Shutdown()
+	defer func() {
+		err = router.Shutdown()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()

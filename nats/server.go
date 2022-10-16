@@ -96,6 +96,6 @@ func Conn() *natsgo.EncodedConn {
 
 // Drain and close the internal NATS connection.
 func Disconnect() {
-	natsConn.Drain()
+	_ = natsConn.Drain()
 	natsConn.Close()
 }
