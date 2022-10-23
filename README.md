@@ -9,6 +9,7 @@ The backend is responsible for:
     - [Usage and deployment](#usage-and-deployment)
     - [Configuration](#configuration)
     - [API](#api)
+    - [Metrics](#metrics)
 
 ### Usage and deployment
 Docker has become the industry standard nowadays, so an official Docker image is provided as part of this project. The basic setup requires only the one image, but an external NATS server can be provided (`WIP`, see configuration).
@@ -61,3 +62,6 @@ For example, it's recommended to set `nats.token` (the NATS server access token 
 
 ### API
 The backend will automatically generate its own [Swagger](https://swagger.io/) documentation and serve a webpage with [Swagger UI](https://swagger.io/tools/swagger-ui/) at `https://$DOMAIN/api/docs`. The common JSON objects are defined as Golang structs in [`openrfsense/common.types`](https://github.com/openrfsense/common).
+
+### Metrics
+Metrics are served at `https://$DOMAIN/metrics` if enabled in the configuration (defined by the value of `backend.metrics`, see default configuration). A simple, dynamic web page is shown by default but the metrics can also be retrieved in JSON format by sending `Accept: application/json` along with the request. For more information, see the [Monitor middleware for Fiber](https://docs.gofiber.io/api/middleware/monitor).

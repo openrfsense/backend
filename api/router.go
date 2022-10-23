@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet/v2"
@@ -76,6 +77,11 @@ func Start(prefix string, routerConfig ...fiber.Config) *fiber.App {
 		return c.Redirect("/api/docs/index.html")
 	})
 	router.Get("/api/docs/*", swagger.New(swaggerConfig))
+
+	// Metrics page and API, but only if enabled in configuration
+	if config.Get[bool]("backend.metrics") {
+		router.Get("/metrics", monitor.New())
+	}
 
 	addr := fmt.Sprintf(":%d", config.GetWeakInt("backend.port"))
 
