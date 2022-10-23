@@ -18,7 +18,7 @@ import (
 //
 // @summary     List nodes
 // @description Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.
-// @tags        nodes,administration
+// @tags        administration
 // @security    BasicAuth
 // @produce     json
 // @success     200 {array} stats.Stats "Bare statistics for all the running and connected nodes"
@@ -76,7 +76,7 @@ func ListGet(ctx *fiber.Ctx) error {
 //
 // @summary     Get stats from a node
 // @description Returns full stats from the node with given hardware ID. Will time out in `300ms` if the node does not respond.
-// @tags        nodes,administration
+// @tags        administration
 // @security    BasicAuth
 // @param       id path string true "Node hardware ID"
 // @produce     json
@@ -103,7 +103,7 @@ func NodeStatsGet(ctx *fiber.Ctx) error {
 //
 // @summary     Get an aggregated spectrum measurement from a list of nodes
 // @description Sends an aggregated measurement request to the nodes specified in `sensors` and returns a list of `stats.Stats` objects for all sensors taking part in the campaign. Will time out in `300ms` if any sensor does not respond.
-// @tags        nodes,measurement
+// @tags        measurement
 // @security    BasicAuth
 // @param       id body types.AggregatedMeasurementRequest true "Measurement request object"
 // @produce     json

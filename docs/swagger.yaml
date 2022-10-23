@@ -75,7 +75,6 @@ paths:
       - BasicAuth: []
       summary: List nodes
       tags:
-      - nodes
       - administration
   /nodes/{id}/aggregated:
     post:
@@ -105,7 +104,6 @@ paths:
       - BasicAuth: []
       summary: Get an aggregated spectrum measurement from a list of nodes
       tags:
-      - nodes
       - measurement
   /nodes/{id}/stats:
     get:
@@ -131,7 +129,6 @@ paths:
       - BasicAuth: []
       summary: Get stats from a node
       tags:
-      - nodes
       - administration
 securityDefinitions:
   BasicAuth:

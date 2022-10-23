@@ -26,7 +26,6 @@
                     "application/json"
                 ],
                 "tags": [
-                    "nodes",
                     "administration"
                 ],
                 "summary": "List nodes",
@@ -58,7 +57,6 @@
                     "application/json"
                 ],
                 "tags": [
-                    "nodes",
                     "measurement"
                 ],
                 "summary": "Get an aggregated spectrum measurement from a list of nodes",
@@ -101,7 +99,6 @@
                     "application/json"
                 ],
                 "tags": [
-                    "nodes",
                     "administration"
                 ],
                 "summary": "Get stats from a node",

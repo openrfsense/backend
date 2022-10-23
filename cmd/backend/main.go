@@ -13,6 +13,7 @@ import (
 	"github.com/openrfsense/backend/api"
 	"github.com/openrfsense/backend/docs"
 	"github.com/openrfsense/backend/nats"
+	"github.com/openrfsense/backend/ui"
 	"github.com/openrfsense/common/config"
 	"github.com/openrfsense/common/logging"
 )
@@ -94,7 +95,10 @@ func main() {
 	router := api.Start("/api/v1", fiber.Config{
 		AppName:               "openrfsense-backend",
 		DisableStartupMessage: true,
+		Views:                 ui.NewEngine(),
 	})
+	// Initialize UI (templated web pages)
+	ui.Init(router)
 	defer func() {
 		err = router.Shutdown()
 		if err != nil {

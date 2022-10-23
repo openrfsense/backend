@@ -35,7 +35,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nodes",
                     "administration"
                 ],
                 "summary": "List nodes",
@@ -67,7 +66,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nodes",
                     "measurement"
                 ],
                 "summary": "Get an aggregated spectrum measurement from a list of nodes",
@@ -110,7 +108,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "nodes",
                     "administration"
                 ],
                 "summary": "Get stats from a node",

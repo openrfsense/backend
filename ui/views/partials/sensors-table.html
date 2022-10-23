@@ -1,0 +1,32 @@
+<div class="card">
+  <div class="card-table table-responsive">
+    <table class="table table-vcenter">
+      <thead>
+        <tr>
+          <th>Hostname</th>
+          <th>Hardware ID</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th class="w-1"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range .sensors }}
+        <tr>
+          <td>{{ .Hostname }}</td>
+          <td class="text-muted">
+            <samp>{{ .ID }}</samp>
+          </td>
+          <td class="text-muted"><a href="#" class="text-reset">{{ .Providers.location.name }}</a></td>
+          <td class="text-muted">
+            {{ .Providers.sensor.status }}
+          </td>
+          <td>
+            <a href="/sensor/{{ .ID }}">View</a>
+          </td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+</div>
