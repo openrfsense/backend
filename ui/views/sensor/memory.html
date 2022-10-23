@@ -1,0 +1,30 @@
+<div class="card">
+  <div class="card-header">
+    <h3>Memory</h3>
+  </div>
+  <div class="card-body">
+    <div class="progress progress-separated mb-3 mt-2">
+      <div class="progress-bar bg-primary" role="progressbar"
+        style="width: {{ percent .Providers.memory.buffers .Providers.memory.total }}%" aria-label="Buffers"></div>
+      <div class="progress-bar bg-info" role="progressbar"
+        style="width: {{ percent .Providers.memory.cached .Providers.memory.total }}%" aria-label="Cached"></div>
+    </div>
+    <div class="row">
+      <div class="col-auto d-flex align-items-center pe-2">
+        <span class="legend me-2 bg-primary"></span>
+        <span>Buffers</span>
+        <span class="d-none d-md-inline d-lg-none d-xxl-inline ms-2 text-muted">{{ humanizeSizeKB .Providers.memory.buffers }}</span>
+      </div>
+      <div class="col-auto d-flex align-items-center px-2">
+        <span class="legend me-2 bg-info"></span>
+        <span>Cached</span>
+        <span class="d-none d-md-inline d-lg-none d-xxl-inline ms-2 text-muted">{{ humanizeSizeKB .Providers.memory.cached }}</span>
+      </div>
+      <div class="col-auto d-flex align-items-center ps-2">
+        <span class="legend me-2"></span>
+        <span>Free</span>
+        <span class="d-none d-md-inline d-lg-none d-xxl-inline ms-2 text-muted">{{ humanizeSizeKB .Providers.memory.free }}</span>
+      </div>
+    </div>
+  </div>
+</div>

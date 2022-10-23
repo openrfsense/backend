@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/arsmn/fiber-swagger/v2 v2.31.1
+	github.com/dustin/go-humanize v1.0.0
 	github.com/gofiber/fiber/v2 v2.39.0
 	github.com/gofiber/helmet/v2 v2.2.17
 	github.com/nats-io/nats-server/v2 v2.9.3
@@ -11,6 +12,7 @@ require (
 	github.com/openrfsense/common v0.0.0-20221015104008-438ea8d5fb05
 	github.com/spf13/pflag v1.0.5
 	github.com/swaggo/swag v1.8.7
+	golang.org/x/text v0.4.0
 )
 
 require (

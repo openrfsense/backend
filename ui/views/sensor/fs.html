@@ -1,0 +1,28 @@
+<div class="card">
+  <div class="card-header">
+    <h3>Storage</h3>
+  </div>
+  {{ range .Providers.fs }}
+  <div class="card-body">
+    <p class="mb-3">
+      <samp>{{ .device }}</samp> mounted on <samp>{{ .mount }}</samp>
+    </p>
+    <div class="progress progress-separated mb-3 mt-2">
+      <div class="progress-bar bg-success" role="progressbar"
+        style="width: {{ percent .used .size }}%" aria-label="Used"></div>
+    </div>
+    <div class="row">
+      <div class="col-auto d-flex align-items-center pe-2">
+        <span class="legend me-2 bg-success"></span>
+        <span>Used</span>
+        <span class="d-none d-md-inline d-lg-none d-xxl-inline ms-2 text-muted">{{ humanizeSizeB .used }}</span>
+      </div>
+      <div class="col-auto d-flex align-items-center ps-2">
+        <span class="legend me-2"></span>
+        <span>Free</span>
+        <span class="d-none d-md-inline d-lg-none d-xxl-inline ms-2 text-muted">{{ humanizeSizeB .available }}</span>
+      </div>
+    </div>
+  </div>
+  {{ end }}
+</div>

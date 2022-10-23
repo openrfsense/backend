@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenRFSense</title>
-  <link rel="stylesheet" href="static/tabler.min.css">
-  <script src="static/tabler.min.js"></script>
-</head>
+{{ template "views/partials/head" . }}
 
 <body>
   {{ template "views/partials/header" . }}
   <div class="container-xl pt-4">
-    {{ template "views/partials/sensors-table" . }}
+    {{ template "views/index/table" . }}
   </div>
 </body>
 
