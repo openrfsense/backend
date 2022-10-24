@@ -1,11 +1,22 @@
 <div class="card">
   <div class="card-header">
     <h3 class="card-title">Sensors</h3>
+    <div class="ms-auto">
+      <button type="button" class="btn btn-success sensor-table-button" data-bs-toggle="modal"
+        data-bs-target="#modal-campaign" disabled autocomplete="off">
+        Start campaign
+      </button>
+    </div>
   </div>
+
   <div class="card-table table-responsive">
     <table class="table table-vcenter">
       <thead>
         <tr>
+          <th class="w-1">
+            <input name="sensors-all" class="form-check-input m-0 align-middle" type="checkbox"
+              aria-label="Select all sensors">
+          </th>
           <th>Hostname</th>
           <th>Hardware ID</th>
           <th>Location</th>
@@ -16,26 +27,30 @@
       <tbody>
         {{ range .sensors }}
         <tr>
+          <td>
+            <input class="sensor-checkbox form-check-input m-0 align-middle" type="checkbox" aria-label="Select sensor"
+              name="sensorId" autocomplete="off" form="campaign-form" value="{{ .ID }}">
+          </td>
           <td>{{ .Hostname }}</td>
           <td class="text-muted">
             <samp>{{ .ID }}</samp>
           </td>
           <td class="text-muted"><a href="#" class="text-reset">{{ .Providers.location.name }}</a></td>
           <td class="text-muted">
-            {{ if eq .Providers.sensor.status "FREE" }}
-            <span class="badge bg-success-lt me-1">
-            {{ else if eq .Providers.sensor.status "BUSY" }}
-            <span class="badge bg-yellow-lt me-1">
-            {{ else if eq .Providers.sensor.status "ERROR" }}
-            <span class="badge bg-danger-lt me-1">
-            {{ else }}
-            <span class="badge bg-secondary-lt me-1">
-            {{ end }}
-            {{ title .Providers.sensor.status }}
-            </span>
+          {{ if eq .Providers.sensor.status "FREE" }}
+          <span class="badge bg-success-lt me-1">
+          {{ else if eq .Providers.sensor.status "BUSY" }}
+          <span class="badge bg-yellow-lt me-1">
+          {{ else if eq .Providers.sensor.status "ERROR" }}
+          <span class="badge bg-danger-lt me-1">
+          {{ else }}
+          <span class="badge bg-secondary-lt me-1">
+          {{ end }}
+          {{ title .Providers.sensor.status }}
+          </span>
           </td>
           <td>
-            <a href="/sensor/{{ .ID }}">View</a>
+            <a href="/sensor/{{ .ID }}" class="btn">View</a>
           </td>
         </tr>
         {{ end }}

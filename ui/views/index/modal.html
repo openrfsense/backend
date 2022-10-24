@@ -1,0 +1,132 @@
+<div id="modal-campaign" class="modal modal-blur fade" tabindex="-1">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Measurement campaign settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Measurement type</label>
+        <div class="form-selectgroup-boxes row mb-3">
+          <div class="col-lg-6 mb-2 mb-lg-2">
+            <label class="form-selectgroup-item">
+              <input type="radio" value="aggregated" class="form-selectgroup-input" name="measurementType"
+                form="campaign-form" autocomplete="off" required>
+              <span class="form-selectgroup-label d-flex align-items-center p-3">
+                <span class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                </span>
+                <span class="form-selectgroup-label-content">
+                  <span class="form-selectgroup-title strong mb-1">Aggregated</span>
+                  <span class="d-block text-muted">Access data averaged over the interval controlled by "time
+                    resolution"</span>
+                </span>
+              </span>
+            </label>
+          </div>
+          <div class="col-lg-6">
+            <label class="form-selectgroup-item">
+              <input type="radio" value="raw" class="form-selectgroup-input" name="measurementType" form="campaign-form"
+                autocomplete="off" required>
+              <span class="form-selectgroup-label d-flex align-items-center p-3">
+                <span class="me-3">
+                  <span class="form-selectgroup-check"></span>
+                </span>
+                <span class="form-selectgroup-label-content">
+                  <span class="form-selectgroup-title strong mb-1">Raw FFT</span>
+                  <span class="d-block text-muted">Access FFT measurements as they are received by the sensor</span>
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="mb-3">
+              <label class="form-label">Minimum frequency</label>
+              <div class="input-group">
+                <input type="number" min="1" class="form-control raw-disable" autocomplete="off" name="freqMin"
+                  form="campaign-form" required>
+                <span class="input-group-text">
+                  Hz
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="mb-3">
+              <label class="form-label">Maximum frequency</label>
+              <div class="input-group">
+                <input type="number" min="1" class="form-control raw-disable" autocomplete="off" name="freqMax"
+                  form="campaign-form" required>
+                <span class="input-group-text">
+                  Hz
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="mb-3">
+              <label class="form-label">Frequency resolution</label>
+              <div class="input-group">
+                <input type="number" min="1" class="form-control raw-disable" autocomplete="off" name="freqRes"
+                  form="campaign-form" required>
+                <span class="input-group-text">
+                  Hz
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Start</label>
+          <div class="row">
+            <div class="col-lg-6 mb-2 mb-lg-2">
+              <input type="date" class="form-control" name="startDate" form="campaign-form" required>
+            </div>
+            <div class="col-lg-6">
+              <input type="time" class="form-control" name="startTime" form="campaign-form" required>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">End</label>
+          <div class="row">
+            <div class="col-lg-6 mb-2 mb-lg-2">
+              <input type="date" class="form-control" name="endDate" form="campaign-form" required>
+            </div>
+            <div class="col-lg-6">
+              <input type="time" class="form-control" name="endTime" form="campaign-form" required>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Time resolution</label>
+          <div class="input-group">
+            <input type="number" min="1" class="form-control raw-disable" autocomplete="off" form="campaign-form"
+              required>
+            <span class="input-group-text">
+              seconds
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="row w-100">
+          <div class="col-auto p-0">
+            <input type="reset" class="btn" value="Reset" form="campaign-form">
+          </div>
+          <div class="col-auto ms-auto p-0">
+            <form id="campaign-form" action="/" method="post" autocomplete="off">
+              <input type="submit" class="btn btn-success" value="Start campaign" form="campaign-form">
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
