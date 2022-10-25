@@ -23,38 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/nodes": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "administration"
-                ],
-                "summary": "List nodes",
-                "responses": {
-                    "200": {
-                        "description": "Bare statistics for all the running and connected nodes",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/stats.Stats"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "When the internal timeout for information retrieval expires"
-                    }
-                }
-            }
-        },
-        "/nodes/{id}/aggregated": {
+        "/aggregated": {
             "post": {
                 "security": [
                     {
@@ -83,6 +52,37 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/stats.Stats"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "When the internal timeout for information retrieval expires"
+                    }
+                }
+            }
+        },
+        "/nodes": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "administration"
+                ],
+                "summary": "List nodes",
+                "responses": {
+                    "200": {
+                        "description": "Bare statistics for all the running and connected nodes",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -132,6 +132,48 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/raw": {
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Sends a raw measurement request to the nodes specified in ` + "`" + `sensors` + "`" + ` and returns a list of ` + "`" + `stats.Stats` + "`" + ` objects for all sensors taking part in the campaign. Will time out in ` + "`" + `300ms` + "`" + ` if any sensor does not respond.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "measurement"
+                ],
+                "summary": "Get a raw spectrum measurement from a list of nodes",
+                "parameters": [
+                    {
+                        "description": "Measurement request object",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.RawMeasurementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/stats.Stats"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "When the internal timeout for information retrieval expires"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -168,6 +210,10 @@ const docTemplate = `{
                     "description": "Start time in milliseconds since epoch (Unix time)",
                     "type": "integer"
                 },
+                "campaignId": {
+                    "description": "Campaign ID. For internal use only, will be ignored if not null",
+                    "type": "string"
+                },
                 "end": {
                     "description": "End time in milliseconds since epoch (Unix time)",
                     "type": "integer"
@@ -194,6 +240,30 @@ const docTemplate = `{
                 "timeRes": {
                     "description": "Time resolution in seconds",
                     "type": "integer"
+                }
+            }
+        },
+        "types.RawMeasurementRequest": {
+            "type": "object",
+            "properties": {
+                "begin": {
+                    "description": "Start time in milliseconds since epoch (Unix time)",
+                    "type": "integer"
+                },
+                "campaignId": {
+                    "description": "Campaign ID. For internal use only, will be ignored if not null",
+                    "type": "string"
+                },
+                "end": {
+                    "description": "End time in milliseconds since epoch (Unix time)",
+                    "type": "integer"
+                },
+                "sensors": {
+                    "description": "List of sensor hardware IDs to run the measurement campaign on",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }

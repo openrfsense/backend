@@ -70,6 +70,7 @@ func Start(prefix string, routerConfig ...fiber.Config) *fiber.App {
 		router.Get("/nodes", ListGet)
 		router.Get("/nodes/:id/stats", NodeStatsGet)
 		router.Post("/aggregated", NodeAggregatedPost)
+		router.Post("/raw", NodeRawPost)
 	})
 
 	// Setup documentation routes

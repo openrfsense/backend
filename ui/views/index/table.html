@@ -14,8 +14,8 @@
       <thead>
         <tr>
           <th class="w-1">
-            <input name="sensors-all" class="form-check-input m-0 align-middle" type="checkbox"
-              aria-label="Select all sensors">
+            <input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select all sensors"
+              autocomplete="off" name="sensors-all">
           </th>
           <th>Hostname</th>
           <th>Hardware ID</th>
@@ -28,8 +28,8 @@
         {{ range .sensors }}
         <tr>
           <td>
-            <input class="sensor-checkbox form-check-input m-0 align-middle" type="checkbox" aria-label="Select sensor"
-              name="sensorId" autocomplete="off" form="campaign-form" value="{{ .ID }}">
+            <input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select sensor"
+              autocomplete="off" name="sensor-checkbox" value="{{ .ID }}">
           </td>
           <td>{{ .Hostname }}</td>
           <td class="text-muted">

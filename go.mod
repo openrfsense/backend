@@ -9,7 +9,7 @@ require (
 	github.com/gofiber/helmet/v2 v2.2.17
 	github.com/nats-io/nats-server/v2 v2.9.3
 	github.com/nats-io/nats.go v1.18.0
-	github.com/openrfsense/common v0.0.0-20221015104008-438ea8d5fb05
+	github.com/openrfsense/common v0.0.0-20221025094856-bc231c9508fb
 	github.com/spf13/pflag v1.0.5
 	github.com/swaggo/swag v1.8.7
 	golang.org/x/text v0.4.0

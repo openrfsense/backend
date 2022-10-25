@@ -1,7 +1,9 @@
 // Toggle all checkboxes using the "toggle-all" checkbox on top of the table
 var selectAll = document.querySelector("input[name=sensors-all]")
+var checkboxes = document.querySelectorAll("input[name=sensor-checkbox]")
+
 selectAll.addEventListener("change", () => {
-    document.querySelectorAll(".sensor-checkbox").forEach(sc => {
+    checkboxes.forEach(sc => {
         sc.checked = selectAll.checked
         sc.dispatchEvent(new Event("change"))
     })
@@ -9,7 +11,6 @@ selectAll.addEventListener("change", () => {
 
 // Enable or disable the table control buttons (any button with `.sensor-table-button`)
 // if no checkboxes are ticked
-var checkboxes = document.querySelectorAll(".sensor-checkbox")
 checkboxes.forEach(sc => {
     sc.addEventListener("change", () => {
         var checked = Array.from(checkboxes).filter(c => c.checked).length
@@ -19,20 +20,22 @@ checkboxes.forEach(sc => {
         } else {
             buttons.forEach(b => b.disabled = true)
         }
+
+        // If all checkboxes are ticked, also tick the "select all"
+        selectAll.checked = (checked === checkboxes.length)
     })
 })
 
-function formSubmit(event) {
-    fetch(event.target.action, {
-        method: event.target.method,
-        body: new FormData(event.target),
-    })
-    event.preventDefault()
-}
-
 // Prevent campaign form from redirecting, use REST instead
-document.querySelector("#campaign-form").addEventListener("submit", event => {
+var form = document.getElementById("campaign-form")
+form.addEventListener("submit", event => {
     var data = Object.fromEntries(new FormData(event.target))
+
+    // Get selected/checked sensors from table
+    data.sensors = []
+    checkboxes.forEach(cb => {
+        if (cb.checked) data.sensors.push(cb.value)
+    })
     console.log(data)
 
     event.preventDefault()

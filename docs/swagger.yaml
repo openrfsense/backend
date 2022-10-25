@@ -25,6 +25,9 @@ definitions:
       begin:
         description: Start time in milliseconds since epoch (Unix time)
         type: integer
+      campaignId:
+        description: Campaign ID. For internal use only, will be ignored if not null
+        type: string
       end:
         description: End time in milliseconds since epoch (Unix time)
         type: integer
@@ -46,6 +49,23 @@ definitions:
         description: Time resolution in seconds
         type: integer
     type: object
+  types.RawMeasurementRequest:
+    properties:
+      begin:
+        description: Start time in milliseconds since epoch (Unix time)
+        type: integer
+      campaignId:
+        description: Campaign ID. For internal use only, will be ignored if not null
+        type: string
+      end:
+        description: End time in milliseconds since epoch (Unix time)
+        type: integer
+      sensors:
+        description: List of sensor hardware IDs to run the measurement campaign on
+        items:
+          type: string
+        type: array
+    type: object
 info:
   contact:
     name: OpenRFSense
@@ -56,27 +76,7 @@ info:
     url: https://spdx.org/licenses/AGPL-3.0-or-later.html
   title: OpenRFSense backend API
 paths:
-  /nodes:
-    get:
-      description: Returns a list of all connected nodes by their hardware ID. Will
-        time out in 300ms if any one of the nodes does not respond.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Bare statistics for all the running and connected nodes
-          schema:
-            items:
-              $ref: '#/definitions/stats.Stats'
-            type: array
-        "500":
-          description: When the internal timeout for information retrieval expires
-      security:
-      - BasicAuth: []
-      summary: List nodes
-      tags:
-      - administration
-  /nodes/{id}/aggregated:
+  /aggregated:
     post:
       description: Sends an aggregated measurement request to the nodes specified
         in `sensors` and returns a list of `stats.Stats` objects for all sensors taking
@@ -105,6 +105,26 @@ paths:
       summary: Get an aggregated spectrum measurement from a list of nodes
       tags:
       - measurement
+  /nodes:
+    get:
+      description: Returns a list of all connected nodes by their hardware ID. Will
+        time out in 300ms if any one of the nodes does not respond.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bare statistics for all the running and connected nodes
+          schema:
+            items:
+              $ref: '#/definitions/stats.Stats'
+            type: array
+        "500":
+          description: When the internal timeout for information retrieval expires
+      security:
+      - BasicAuth: []
+      summary: List nodes
+      tags:
+      - administration
   /nodes/{id}/stats:
     get:
       description: Returns full stats from the node with given hardware ID. Will time
@@ -130,6 +150,35 @@ paths:
       summary: Get stats from a node
       tags:
       - administration
+  /raw:
+    post:
+      description: Sends a raw measurement request to the nodes specified in `sensors`
+        and returns a list of `stats.Stats` objects for all sensors taking part in
+        the campaign. Will time out in `300ms` if any sensor does not respond.
+      parameters:
+      - description: Measurement request object
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/types.RawMeasurementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bare statistics for all nodes in the measurement campaign.
+            Will always include sensor status information.
+          schema:
+            items:
+              $ref: '#/definitions/stats.Stats'
+            type: array
+        "500":
+          description: When the internal timeout for information retrieval expires
+      security:
+      - BasicAuth: []
+      summary: Get a raw spectrum measurement from a list of nodes
+      tags:
+      - measurement
 securityDefinitions:
   BasicAuth:
     type: basic
