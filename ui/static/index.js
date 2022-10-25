@@ -29,6 +29,10 @@ checkboxes.forEach(sc => {
 // Prevent campaign form from redirecting, use REST instead
 var form = document.getElementById("campaign-form")
 form.addEventListener("submit", event => {
+    // Hide the modal if all is well (required fields will be handled
+    // by the browser)
+    bootstrap.Modal.getInstance("#modal-campaign").hide()
+
     var data = Object.fromEntries(new FormData(event.target))
 
     // Get selected/checked sensors from table

@@ -68,10 +68,21 @@ dockers:
       - backend
     image_templates:
       - openrfsense/backend:latest-amd64
-      - openrfsense/backend:v{{ .Major }}-amd64
-      - openrfsense/backend:{{ .Tag }}-amd64
+      - openrfsense/backend:{{ .Major }}-amd64
+      - openrfsense/backend:{{ .Major }}.{{ .Minor }}-amd64
+      - openrfsense/backend:{{ .Version }}-amd64
     build_flag_templates:
+      - "--pull"
       - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.title=OpenRFSense Backend"
+      - "--label=org.opencontainers.image.description=OpenRFSense self-hostable server backend"
+      - "--label=org.opencontainers.image.url=https://github.com/openrfsense/backend"
+      - "--label=org.opencontainers.image.documentation=https://github.com/openrfsense/backend"
+      - "--label=org.opencontainers.image.vendor=OpenRFSense"
+      - "--label=org.opencontainers.image.licenses=AGPL-3.0"
+      - "--label=org.opencontainers.image.source=https://github.com/openrfsense/backend"
     extra_files:
       - config.yml
   - id: arm64
@@ -83,9 +94,20 @@ dockers:
       - backend
     image_templates:
       - openrfsense/backend:latest-arm64
-      - openrfsense/backend:v{{ .Major }}-arm64
-      - openrfsense/backend:{{ .Tag }}-arm64
+      - openrfsense/backend:{{ .Major }}-arm64
+      - openrfsense/backend:{{ .Major }}.{{ .Minor }}-arm64
+      - openrfsense/backend:{{ .Version }}-arm64
     build_flag_templates:
+      - "--pull"
       - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.title=OpenRFSense Backend"
+      - "--label=org.opencontainers.image.description=OpenRFSense self-hostable server backend"
+      - "--label=org.opencontainers.image.url=https://github.com/openrfsense/backend"
+      - "--label=org.opencontainers.image.documentation=https://github.com/openrfsense/backend"
+      - "--label=org.opencontainers.image.vendor=OpenRFSense"
+      - "--label=org.opencontainers.image.licenses=AGPL-3.0"
+      - "--label=org.opencontainers.image.source=https://github.com/openrfsense/backend"
     extra_files:
       - config.yml
