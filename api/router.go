@@ -63,6 +63,7 @@ func Start(prefix string, routerConfig ...fiber.Config) *fiber.App {
 		requestid.New(),
 	)
 
+	// Backend router for /api/v1
 	router.Route(prefix, func(router fiber.Router) {
 		router.Use(basicauth.New(basicauth.Config{
 			Users: creds,

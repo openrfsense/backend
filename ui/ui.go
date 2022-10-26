@@ -53,12 +53,18 @@ func NewEngine() *html.Engine {
 func Init(router *fiber.App) {
 	router.Use(
 		"/static",
+		compress.New(compress.Config{
+			Level: compress.LevelBestCompression,
+		}),
+		func(c *fiber.Ctx) error {
+			c.Set("Cache-Control", "public, max-age=31536000")
+			return c.Next()
+		},
 		filesystem.New(filesystem.Config{
 			Root:       http.FS(staticFs),
 			PathPrefix: "static",
 			Browse:     true,
 		}),
-		compress.New(),
 	)
 
 	router.Get("/", renderIndex)
