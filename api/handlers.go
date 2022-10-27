@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -26,48 +25,11 @@ import (
 // @failure     500 "When the internal timeout for information retrieval expires"
 // @router      /nodes [get]
 func ListGet(ctx *fiber.Ctx) error {
-	nodes, err := nats.Presence("node.all")
-	if err != nil {
-		return err
-	}
-
-	// Listen for responses on node.get.all (arbitrary)
-	statsChan := make(chan stats.Stats)
-	sub, err := nats.Conn().Subscribe("node.get.all", func(s *stats.Stats) {
-		statsChan <- *s
+	statsAll, err := nats.Ping[stats.Stats]("node.all", "node.get.all", nats.PingConfig{
+		Timeout: 100 * time.Millisecond,
 	})
-	defer func() {
-		err = sub.Unsubscribe()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
 	if err != nil {
 		return err
-	}
-
-	// Request stats with timeout
-	err = nats.Conn().PublishRequest("node.all", "node.get.all", "")
-	if err != nil {
-		return err
-	}
-	err = nats.Conn().FlushTimeout(300 * time.Millisecond)
-	if err != nil {
-		return err
-	}
-
-	// Collect received stats with timeout
-	c, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
-	defer cancel()
-	statsAll := make([]stats.Stats, 0, nodes)
-	for i := 0; i < nodes; i++ {
-		select {
-		case p := <-statsChan:
-			statsAll = append(statsAll, p)
-		case <-c.Done():
-			log.Error("ListGet timed out")
-			return ctx.SendStatus(http.StatusInternalServerError)
-		}
 	}
 
 	return ctx.JSON(statsAll)
@@ -100,7 +62,7 @@ func NodeStatsGet(ctx *fiber.Ctx) error {
 	return ctx.JSON(stat)
 }
 
-// Starts a measurement on a node and returns an aggregated spectrum measurement
+// Starts a measurement on a list of nodes and returns an aggregated spectrum measurement
 //
 // @summary     Get an aggregated spectrum measurement from a list of nodes
 // @description Sends an aggregated measurement request to the nodes specified in `sensors` and returns a list of `stats.Stats` objects for all sensors taking part in the campaign. Will time out in `300ms` if any sensor does not respond.
@@ -126,45 +88,13 @@ func NodeAggregatedPost(ctx *fiber.Ctx) error {
 	// Overwrite campaign ID
 	amr.CampaignId = id.Generate(9)
 
-	// How many nodes the handler should wait for, so the number of requested sensors
-	nodes := len(amr.Sensors)
-
-	// Listen for responses on node.get.all.aggregated (arbitrary)
-	statsChan := make(chan stats.Stats)
-	sub, err := nats.Conn().Subscribe("node.get.all.aggregated", func(s *stats.Stats) {
-		statsChan <- *s
+	statsAll, err := nats.Ping[stats.Stats]("node.all", "node.get.all", nats.PingConfig{
+		Message: amr,
+		HowMany: len(amr.Sensors),
+		Timeout: 100 * time.Millisecond,
 	})
-	defer func() {
-		err = sub.Unsubscribe()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
 	if err != nil {
 		return err
-	}
-
-	err = nats.Conn().PublishRequest("node.all.aggregated", "node.get.all.aggregated", amr)
-	if err != nil {
-		return err
-	}
-	err = nats.Conn().FlushTimeout(300 * time.Millisecond)
-	if err != nil {
-		return err
-	}
-
-	// Collect received stats with timeout
-	c, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
-	defer cancel()
-	statsAll := make([]stats.Stats, 0, nodes)
-	for i := 0; i < nodes; i++ {
-		select {
-		case p := <-statsChan:
-			statsAll = append(statsAll, p)
-		case <-c.Done():
-			log.Error("NodeAggregated timed out")
-			return ctx.SendStatus(http.StatusInternalServerError)
-		}
 	}
 
 	return ctx.JSON(statsAll)
@@ -196,45 +126,13 @@ func NodeRawPost(ctx *fiber.Ctx) error {
 	// Overwrite campaign ID
 	rmr.CampaignId = id.Generate(9)
 
-	// How many nodes the handler should wait for, so the number of requested sensors
-	nodes := len(rmr.Sensors)
-
-	// Listen for responses on node.get.all.aggregated (arbitrary)
-	statsChan := make(chan stats.Stats)
-	sub, err := nats.Conn().Subscribe("node.get.all.raw", func(s *stats.Stats) {
-		statsChan <- *s
+	statsAll, err := nats.Ping[stats.Stats]("node.all", "node.get.all", nats.PingConfig{
+		Message: rmr,
+		HowMany: len(rmr.Sensors),
+		Timeout: 100 * time.Millisecond,
 	})
-	defer func() {
-		err = sub.Unsubscribe()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
 	if err != nil {
 		return err
-	}
-
-	err = nats.Conn().PublishRequest("node.all.raw", "node.get.all.raw", rmr)
-	if err != nil {
-		return err
-	}
-	err = nats.Conn().FlushTimeout(300 * time.Millisecond)
-	if err != nil {
-		return err
-	}
-
-	// Collect received stats with timeout
-	c, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
-	defer cancel()
-	statsAll := make([]stats.Stats, 0, nodes)
-	for i := 0; i < nodes; i++ {
-		select {
-		case p := <-statsChan:
-			statsAll = append(statsAll, p)
-		case <-c.Done():
-			log.Error("NodeRaw timed out")
-			return ctx.SendStatus(http.StatusInternalServerError)
-		}
 	}
 
 	return ctx.JSON(statsAll)

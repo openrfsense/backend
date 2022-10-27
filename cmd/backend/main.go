@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/openrfsense/backend/api"
+	"github.com/openrfsense/backend/config"
 	"github.com/openrfsense/backend/docs"
 	"github.com/openrfsense/backend/nats"
 	"github.com/openrfsense/backend/ui"
-	"github.com/openrfsense/common/config"
 	"github.com/openrfsense/common/logging"
 )
 
@@ -48,23 +48,23 @@ func main() {
 	}
 
 	log.Info("Loading config")
-	err := config.Load(*configPath, DefaultConfig)
+	konfig, err := config.Load(*configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	docs.SwaggerInfo.Host = config.GetOrDefault("backend.host", "localhost")
+	docs.SwaggerInfo.Host = konfig.String("backend.host")
 	docs.SwaggerInfo.Version = version
 
 	log.Info("Starting NATS server")
-	err = nats.Start()
+	err = nats.Start(konfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer nats.Disconnect()
 
 	log.Info("Starting API")
-	router := api.Start("/api/v1", fiber.Config{
+	router := api.Start(konfig, "/api/v1", fiber.Config{
 		AppName:               "openrfsense-backend",
 		DisableStartupMessage: true,
 		Views:                 ui.NewEngine(),

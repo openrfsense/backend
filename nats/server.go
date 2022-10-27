@@ -4,11 +4,11 @@ import (
 	"errors"
 	"time"
 
+	"github.com/knadh/koanf"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	natsgo "github.com/nats-io/nats.go"
 
-	"github.com/openrfsense/common/config"
 	"github.com/openrfsense/common/logging"
 )
 
@@ -26,11 +26,11 @@ var ErrNotReady = errors.New("server still isn't ready for connections")
 
 // Start the embedded NATS server. If options are passed as parameters, they will override the internal
 // options (the common config module is used).
-func Start(options ...server.Options) error {
-	token := config.Must[string]("nats.token")
+func Start(config *koanf.Koanf, options ...server.Options) error {
+	token := config.MustString("nats.token")
 	opts := server.Options{
-		Host:          config.GetOrDefault("backend.host", ""),
-		Port:          config.GetOrDefault("nats.port", 0),
+		Host:          config.String("backend.host"),
+		Port:          config.MustInt("nats.port"),
 		JetStream:     false,
 		Authorization: token,
 		Debug:         true,

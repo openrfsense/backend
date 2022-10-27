@@ -12,9 +12,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet/v2"
+	"github.com/knadh/koanf"
 
 	_ "github.com/openrfsense/backend/docs"
-	"github.com/openrfsense/common/config"
 	"github.com/openrfsense/common/logging"
 )
 
@@ -50,8 +50,8 @@ var swaggerConfig = swagger.Config{
 
 // Create a router for the public API. Initializes all REST endpoints under the given prefix
 // and servers swagger documentation on /swagger.
-func Start(prefix string, routerConfig ...fiber.Config) *fiber.App {
-	creds := config.MustMap[string, string]("backend.users")
+func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fiber.App {
+	creds := config.MustStringMap("backend.users")
 
 	router := fiber.New(routerConfig...)
 
@@ -81,11 +81,11 @@ func Start(prefix string, routerConfig ...fiber.Config) *fiber.App {
 	router.Get("/api/docs/*", swagger.New(swaggerConfig))
 
 	// Metrics page and API, but only if enabled in configuration
-	if config.Get[bool]("backend.metrics") {
+	if config.Bool("backend.metrics") {
 		router.Get("/metrics", monitor.New())
 	}
 
-	addr := fmt.Sprintf(":%d", config.GetWeakInt("backend.port"))
+	addr := fmt.Sprintf(":%d", config.MustInt("backend.port"))
 
 	go func() {
 		if err := router.Listen(addr); err != nil {

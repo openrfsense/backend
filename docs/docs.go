@@ -207,16 +207,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "begin": {
-                    "description": "Start time in milliseconds since epoch (Unix time)",
-                    "type": "integer"
+                    "description": "Start time in ISO 8601",
+                    "type": "string"
                 },
                 "campaignId": {
                     "description": "Campaign ID. For internal use only, will be ignored if not null",
                     "type": "string"
                 },
                 "end": {
-                    "description": "End time in milliseconds since epoch (Unix time)",
-                    "type": "integer"
+                    "description": "End time in ISO 8601",
+                    "type": "string"
                 },
                 "freqMax": {
                     "description": "Upper bound for frequency in Hz",
@@ -247,16 +247,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "begin": {
-                    "description": "Start time in milliseconds since epoch (Unix time)",
-                    "type": "integer"
+                    "description": "Start time in ISO 8601",
+                    "type": "string"
                 },
                 "campaignId": {
                     "description": "Campaign ID. For internal use only, will be ignored if not null",
                     "type": "string"
                 },
                 "end": {
-                    "description": "End time in milliseconds since epoch (Unix time)",
-                    "type": "integer"
+                    "description": "End time in ISO 8601",
+                    "type": "string"
                 },
                 "sensors": {
                     "description": "List of sensor hardware IDs to run the measurement campaign on",
