@@ -12,18 +12,18 @@ import (
 )
 
 type Backend struct {
-	Metrics  bool              `yaml:"metrics"`
-	Port     int               `yaml:"port"`
-	Database Postgres          `yaml:"postgres"`
-	Users    map[string]string `yaml:"users"`
+	Metrics bool              `yaml:"metrics"`
+	Port    int               `yaml:"port"`
+	Users   map[string]string `yaml:"users"`
 }
 
 type Postgres struct {
-	Host     string   `yaml:"host"`
-	Port     int      `yaml:"port"`
-	Username string   `yaml:"username"`
-	Password string   `yaml:"password"`
-	Params   []string `yaml:"params"`
+	Host         string   `yaml:"host"`
+	Port         int      `yaml:"port"`
+	DatabaseName string   `yaml:"dbname"`
+	Username     string   `yaml:"username"`
+	Password     string   `yaml:"password"`
+	Params       []string `yaml:"params"`
 }
 
 type NATS struct {
@@ -34,14 +34,22 @@ type NATS struct {
 }
 
 type BackendConfig struct {
-	Backend `yaml:"backend"`
-	NATS    `yaml:"nats"`
+	Backend  `yaml:"backend"`
+	Postgres `yaml:"postgres"`
+	NATS     `yaml:"nats"`
 }
 
 var defaultConfig = BackendConfig{
 	Backend: Backend{
 		Metrics: true,
 		Port:    8080,
+	},
+	Postgres: Postgres{
+		Host:         "localhost",
+		Port:         5432,
+		DatabaseName: "postgres",
+		Username:     "postgres",
+		Password:     "postgres",
 	},
 	NATS: NATS{
 		Protocol: "tcp",

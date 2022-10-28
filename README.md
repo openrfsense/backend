@@ -14,6 +14,8 @@ The backend is responsible for:
 ### Usage and deployment
 Docker has become the industry standard nowadays, so an official Docker image is provided as part of this project. The basic setup requires only the one image, but an external NATS server can be provided (`WIP`, see configuration).
 
+An external database is required for data storage (measurement campaigns and general sample retrieval). Only PostgreSQL is supported and it's easy enough to deploy (see example below). See also default configuration file for more information on how to configure the database connection.
+
 A reverse proxy is also recommended: something like [Caddy](https://caddyserver.com/) is simple to use and has automatic TLS among other nice features.
 
 Docker Compose can also be used to manage your infrastructure with Caddy. An example `docker-compose.yml` would look like this:
@@ -34,6 +36,15 @@ services:
       - ./caddy_data:/data
       - ./caddy_config:/config
     command: ["caddy", "reverse-proxy", "--to", "orfs_backend:8081"]
+
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
   
   openrfsense_backend:
     image: openrfsense-backend:latest
@@ -41,16 +52,23 @@ services:
     depends_on:
       - caddy
     networks:
+      - db
       - proxy
+    environment:
+      ORFS_POSTGRES_HOST: postgres
+      ORFS_POSTGRES_USERNAME: postgres
+      ORFS_POSTGRES_PASSWORD: postgres
+      ORFS_POSTGRES_DBNAME: postgres
 
 networks:
   proxy:
+  db:
 ```
 
 ### Configuration
 > ⚠️ The configuration is still WIP: keys may change in the future
 
-The `config` module from [`openrfsense/common`](https://github.com/openrfsense/common) is used. As such, configuration values are loaded from a YAML file first, then from environment variables.
+Configuration values are loaded from a YAML file first, then from environment variables.
 
 #### YAML
 See the example [`config.yml`](./config.yml) file for now, as the configuration is very prone to change.

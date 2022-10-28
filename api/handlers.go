@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/openrfsense/backend/database"
 	"github.com/openrfsense/backend/nats"
 	"github.com/openrfsense/common/id"
 	"github.com/openrfsense/common/stats"
@@ -24,7 +25,7 @@ import (
 // @success     200 {array} stats.Stats "Bare statistics for all the running and connected nodes"
 // @failure     500 "When the internal timeout for information retrieval expires"
 // @router      /nodes [get]
-func ListGet(ctx *fiber.Ctx) error {
+func NodesGet(ctx *fiber.Ctx) error {
 	statsAll, err := nats.Ping[stats.Stats]("node.all", "node.get.all", nats.PingConfig{
 		Timeout: 100 * time.Millisecond,
 	})
@@ -41,13 +42,13 @@ func ListGet(ctx *fiber.Ctx) error {
 // @description Returns full stats from the node with given hardware ID. Will time out in `300ms` if the node does not respond.
 // @tags        administration
 // @security    BasicAuth
-// @param       id path string true "Node hardware ID"
+// @param       sensor_id path string true "Node hardware ID"
 // @produce     json
 // @success     200 {object} stats.Stats "Full system statistics for the node associated to the given ID"
 // @failure     500 "When the internal timeout for information retrieval expires"
-// @router      /nodes/{id}/stats [get]
+// @router      /nodes/{sensor_id}/stats [get]
 func NodeStatsGet(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
+	id := ctx.Params("sensor_id")
 	if id == "" {
 		return ctx.SendStatus(http.StatusBadRequest)
 	}
@@ -60,6 +61,37 @@ func NodeStatsGet(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(stat)
+}
+
+// Get all samples received from a specific node
+//
+// @summary     Get all samples received from a specific node
+// @description Returns all samples received by the backend from the sensor with the given ID.
+// @tags        data
+// @security    BasicAuth
+// @param       sensor_id path string true "Node hardware ID"
+// @produce     json
+// @success     200 {array} database.Sample "List of samples received by the given sensor"
+// @failure     500 "Generally a database error"
+// @router      /nodes/{sensor_id}/samples [get]
+func NodeSamplesGet(ctx *fiber.Ctx) error {
+	id := ctx.Params("sensor_id")
+	if id == "" {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+
+	samples := []database.Sample{}
+	err := database.Instance().
+		Model(&database.Sample{}).
+		Where("sensor_id = ?", id).
+		Find(&samples).
+		Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return ctx.JSON(samples)
 }
 
 // Starts a measurement on a list of nodes and returns an aggregated spectrum measurement
@@ -94,6 +126,19 @@ func NodeAggregatedPost(ctx *fiber.Ctx) error {
 		Timeout: 100 * time.Millisecond,
 	})
 	if err != nil {
+		return err
+	}
+
+	campaign := &database.Campaign{
+		CampaignId: amr.CampaignId,
+		Sensors:    amr.Sensors,
+		Type:       "PSD",
+		Begin:      amr.Begin,
+		End:        amr.End,
+	}
+	err = database.Instance().Create(campaign).Error
+	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -135,5 +180,103 @@ func NodeRawPost(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	campaign := &database.Campaign{
+		CampaignId: rmr.CampaignId,
+		Sensors:    rmr.Sensors,
+		Type:       "IQ",
+		Begin:      rmr.Begin,
+		End:        rmr.End,
+	}
+	err = database.Instance().Create(campaign).Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
 	return ctx.JSON(statsAll)
+}
+
+// List campaign
+//
+// @summary     List campaigns
+// @description Returns a list of all recorded campaigns (that were successfully started).
+// @tags        data
+// @security    BasicAuth
+// @produce     json
+// @success     200 {array} database.Campaign "All recorded campaigns"
+// @failure     500 "Generally a database error"
+// @router      /campaigns [get]
+func CampaignsGet(ctx *fiber.Ctx) error {
+	campaigns := []database.Campaign{}
+	err := database.Instance().Find(&campaigns).Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return ctx.JSON(campaigns)
+}
+
+// Get a single campaign object
+//
+// @summary     Get a single campaign object
+// @description Returns the campaign object corresponding to the given unique ID.
+// @tags        data
+// @security    BasicAuth
+// @produce     json
+// @success     200 {object} database.Campaign "The campaign with the given ID"
+// @failure     500 "Generally a database error"
+// @router      /campaigns/{campaign_id} [get]
+func CampaignGet(ctx *fiber.Ctx) error {
+	id := ctx.Params("campaign_id")
+	if id == "" {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+
+	campaign := database.Campaign{}
+	err := database.Instance().
+		First(&campaign, "campaign_id = ?", id).
+		Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return ctx.JSON(campaign)
+}
+
+// Get all samples recorded during a specific campaign
+//
+// @summary     Get all samples recorded during a specific campaign
+// @description Returns a list of all the samples recorded during a campaign by the sensors partaking in said campaign.
+// @tags        data
+// @security    BasicAuth
+// @produce     json
+// @success     200 {array} database.Sample "All samples received during the campaign"
+// @failure     500 "Generally a database error"
+// @router      /campaigns/{campaign_id}/samples [get]
+func CampaignSamplesGet(ctx *fiber.Ctx) error {
+	id := ctx.Params("campaign_id")
+	if id == "" {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+
+	campaign := database.Campaign{}
+	err := database.Instance().First(&campaign, "campaign_id = ?", id).Error
+	if err != nil {
+		log.Error(err)
+		return ctx.SendStatus(http.StatusInternalServerError)
+	}
+
+	samples := []database.Sample{}
+	err = database.Instance().
+		Where("campaign_id = ?", campaign.CampaignId).
+		Find(&samples).
+		Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return ctx.JSON(samples)
 }

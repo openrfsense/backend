@@ -65,6 +65,96 @@ const docTemplate = `{
                 }
             }
         },
+        "/campaigns": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns a list of all recorded campaigns (that were successfully started).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "List campaigns",
+                "responses": {
+                    "200": {
+                        "description": "All recorded campaigns",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Campaign"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Generally a database error"
+                    }
+                }
+            }
+        },
+        "/campaigns/{campaign_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns the campaign object corresponding to the given unique ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "Get a single campaign object",
+                "responses": {
+                    "200": {
+                        "description": "The campaign with the given ID",
+                        "schema": {
+                            "$ref": "#/definitions/database.Campaign"
+                        }
+                    },
+                    "500": {
+                        "description": "Generally a database error"
+                    }
+                }
+            }
+        },
+        "/campaigns/{campaign_id}/samples": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns a list of all the samples recorded during a campaign by the sensors partakin in said campaign.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "Get all samples recorded during a specific campaign",
+                "responses": {
+                    "200": {
+                        "description": "All samples received during the campaign",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Sample"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Generally a database error"
+                    }
+                }
+            }
+        },
         "/nodes": {
             "get": {
                 "security": [
@@ -96,7 +186,47 @@ const docTemplate = `{
                 }
             }
         },
-        "/nodes/{id}/stats": {
+        "/nodes/{sensor_id}/samples": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns all samples received by the backend from the sensor with the given ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "Get all samples received from a specific node",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Node hardware ID",
+                        "name": "sensor_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of samples received by the given sensor",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Sample"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Generally a database error"
+                    }
+                }
+            }
+        },
+        "/nodes/{sensor_id}/stats": {
             "get": {
                 "security": [
                     {
@@ -115,7 +245,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Node hardware ID",
-                        "name": "id",
+                        "name": "sensor_id",
                         "in": "path",
                         "required": true
                     }
@@ -177,6 +307,163 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "database.Campaign": {
+            "type": "object",
+            "properties": {
+                "begin": {
+                    "description": "The time at which the campaign is supposed to start",
+                    "type": "string"
+                },
+                "campaignId": {
+                    "description": "The textual, random ID for the campaign",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "end": {
+                    "description": "The time at which the campaign will end",
+                    "type": "string"
+                },
+                "sensors": {
+                    "description": "The list of sensor partaking in the campaign",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "description": "The type of measurements requested",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.Sample": {
+            "type": "object",
+            "properties": {
+                "campaignId": {
+                    "description": "Unique identifier for the campaign this sample belongs to",
+                    "type": "string"
+                },
+                "config": {
+                    "description": "Sensor configuration for the recorded data set",
+                    "$ref": "#/definitions/database.SampleConfig"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "data": {
+                    "description": "Actual measurement data. Unit depends on measurement type",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "lossRate": {
+                    "description": "Sample loss rate in percent",
+                    "type": "number"
+                },
+                "obfuscation": {
+                    "description": "Method used to obfuscate IQ spectrum data",
+                    "type": "string"
+                },
+                "sampleType": {
+                    "description": "Sample type string (IQ, PSD, DEC)",
+                    "type": "string"
+                },
+                "sensorId": {
+                    "description": "The unique hardware id of the sensor",
+                    "type": "string"
+                },
+                "time": {
+                    "description": "Sample timestamp with microseconds precision",
+                    "$ref": "#/definitions/database.SampleTime"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.SampleConfig": {
+            "type": "object",
+            "properties": {
+                "antennaGain": {
+                    "description": "Antenna gain in dBi",
+                    "type": "number"
+                },
+                "antennaId": {
+                    "description": "Identifier for the antenna being used if device has multiple antennas",
+                    "type": "string"
+                },
+                "centerFreq": {
+                    "description": "Center frequency in Hz to which the RF front-end was tuned to while recording the associated spectrum data",
+                    "type": "integer"
+                },
+                "estNoiseFloor": {
+                    "description": "Estimated noise floor in dB",
+                    "type": "number"
+                },
+                "extraConf": {
+                    "description": "Extra configuration for arbitrary data",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "frequencyCorrectionFactor": {
+                    "description": "Correction factor for center frequency in Hz. The correction is already applied to the center frequency (0.0 for no correction)",
+                    "type": "number"
+                },
+                "frontendGain": {
+                    "description": "RF front-end gain in dB (-1 for automatic gain control)",
+                    "type": "number"
+                },
+                "hoppingStrategy": {
+                    "description": "Hopping strategy  used to overcome the bandwidth limitations of the RF front-end (0:Sequential, 1:Random, 2:Similarity)",
+                    "type": "integer"
+                },
+                "iqBalanceCalibration": {
+                    "description": "True if IQ samples are balanced",
+                    "type": "boolean"
+                },
+                "rfSync": {
+                    "description": "Time synchronization of the radio frontend (0: none, 1: GPS, 2: Reference Clock, 5: Other)",
+                    "type": "string"
+                },
+                "samplingRate": {
+                    "description": "Sensor's sampling rate in samples per second",
+                    "type": "integer"
+                },
+                "sigStrengthCalibration": {
+                    "description": "True if signal strength is calibrated",
+                    "type": "boolean"
+                },
+                "systemSync": {
+                    "description": "Time synchronization of the system (0: none, 1: GPS, 2: Reference Clock, 3: NTP, 4: OpenSky, 5: Other)",
+                    "type": "string"
+                }
+            }
+        },
+        "database.SampleTime": {
+            "type": "object",
+            "properties": {
+                "microseconds": {
+                    "description": "Microseconds extension for the UNIX time stamp",
+                    "type": "integer"
+                },
+                "seconds": {
+                    "description": "Number of seconds since the UNIX epoch start on January 1st, 1970 at UTC",
+                    "type": "integer"
+                }
+            }
+        },
         "stats.Stats": {
             "type": "object",
             "properties": {

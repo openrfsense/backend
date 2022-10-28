@@ -68,10 +68,14 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 		router.Use(basicauth.New(basicauth.Config{
 			Users: creds,
 		}))
-		router.Get("/nodes", ListGet)
-		router.Get("/nodes/:id/stats", NodeStatsGet)
+		router.Get("/nodes", NodesGet)
+		router.Get("/nodes/:sensor_id/stats", NodeStatsGet)
+		router.Get("/nodes/:sensor_id/samples", NodeSamplesGet)
 		router.Post("/aggregated", NodeAggregatedPost)
 		router.Post("/raw", NodeRawPost)
+		router.Get("/campaigns", CampaignsGet)
+		router.Get("/campaigns/:campaign_id", CampaignGet)
+		router.Get("/campaigns/:campaign_id/samples", CampaignSamplesGet)
 	})
 
 	// Setup documentation routes

@@ -12,6 +12,7 @@ import (
 
 	"github.com/openrfsense/backend/api"
 	"github.com/openrfsense/backend/config"
+	"github.com/openrfsense/backend/database"
 	"github.com/openrfsense/backend/docs"
 	"github.com/openrfsense/backend/nats"
 	"github.com/openrfsense/backend/ui"
@@ -53,8 +54,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	docs.SwaggerInfo.Host = konfig.String("backend.host")
-	docs.SwaggerInfo.Version = version
+	log.Info("Connecting to database")
+	err = database.Init(konfig)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Info("Starting NATS server")
 	err = nats.Start(konfig)
@@ -64,6 +68,8 @@ func main() {
 	defer nats.Disconnect()
 
 	log.Info("Starting API")
+	docs.SwaggerInfo.Host = konfig.String("backend.host")
+	docs.SwaggerInfo.Version = version
 	router := api.Start(konfig, "/api/v1", fiber.Config{
 		AppName:               "openrfsense-backend",
 		DisableStartupMessage: true,

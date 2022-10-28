@@ -6,6 +6,17 @@ backend:
   users:
     openrfsense: openrfsense
 
+# PostgreSQL database configuration
+postgres:
+  host: localhost
+  port: 5432
+  username: postgres
+  password: postgres
+  dbname: postgres
+  # Extra connection parameters, see PostgreSQL documentation
+  params:
+    - sslmode=disable
+
 # NATS server configuration
 nats:
   # Port for the NATS server

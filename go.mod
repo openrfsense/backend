@@ -3,18 +3,19 @@ module github.com/openrfsense/backend
 go 1.18
 
 require (
-	github.com/Masterminds/squirrel v1.5.3
 	github.com/arsmn/fiber-swagger/v2 v2.31.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gofiber/fiber/v2 v2.39.0
 	github.com/gofiber/helmet/v2 v2.2.17
-	github.com/jackc/pgx/v4 v4.17.2
+	github.com/lib/pq v1.10.7
 	github.com/nats-io/nats-server/v2 v2.9.3
 	github.com/nats-io/nats.go v1.18.0
 	github.com/openrfsense/common v0.0.0-20221027152913-3c313654df87
 	github.com/spf13/pflag v1.0.5
 	github.com/swaggo/swag v1.8.7
 	golang.org/x/text v0.4.0
+	gorm.io/driver/postgres v1.4.5
+	gorm.io/gorm v1.24.1-0.20221020061047-9d82aa567349
 )
 
 require (
@@ -25,9 +26,10 @@ require (
 	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.12.0 // indirect
-	github.com/jackc/puddle v1.3.0 // indirect
-	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
-	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
+	github.com/jackc/pgx/v4 v4.17.2 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect

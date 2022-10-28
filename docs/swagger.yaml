@@ -1,5 +1,125 @@
 basePath: /api/v1
 definitions:
+  database.Campaign:
+    properties:
+      begin:
+        description: The time at which the campaign is supposed to start
+        type: string
+      campaignId:
+        description: The textual, random ID for the campaign
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      end:
+        description: The time at which the campaign will end
+        type: string
+      sensors:
+        description: The list of sensor partaking in the campaign
+        items:
+          type: string
+        type: array
+      type:
+        description: The type of measurements requested
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  database.Sample:
+    properties:
+      campaignId:
+        description: Unique identifier for the campaign this sample belongs to
+        type: string
+      config:
+        $ref: '#/definitions/database.SampleConfig'
+        description: Sensor configuration for the recorded data set
+      createdAt:
+        type: string
+      data:
+        description: Actual measurement data. Unit depends on measurement type
+        items:
+          type: number
+        type: array
+      deletedAt:
+        type: string
+      lossRate:
+        description: Sample loss rate in percent
+        type: number
+      obfuscation:
+        description: Method used to obfuscate IQ spectrum data
+        type: string
+      sampleType:
+        description: Sample type string (IQ, PSD, DEC)
+        type: string
+      sensorId:
+        description: The unique hardware id of the sensor
+        type: string
+      time:
+        $ref: '#/definitions/database.SampleTime'
+        description: Sample timestamp with microseconds precision
+      updatedAt:
+        type: string
+    type: object
+  database.SampleConfig:
+    properties:
+      antennaGain:
+        description: Antenna gain in dBi
+        type: number
+      antennaId:
+        description: Identifier for the antenna being used if device has multiple
+          antennas
+        type: string
+      centerFreq:
+        description: Center frequency in Hz to which the RF front-end was tuned to
+          while recording the associated spectrum data
+        type: integer
+      estNoiseFloor:
+        description: Estimated noise floor in dB
+        type: number
+      extraConf:
+        additionalProperties: true
+        description: Extra configuration for arbitrary data
+        type: object
+      frequencyCorrectionFactor:
+        description: Correction factor for center frequency in Hz. The correction
+          is already applied to the center frequency (0.0 for no correction)
+        type: number
+      frontendGain:
+        description: RF front-end gain in dB (-1 for automatic gain control)
+        type: number
+      hoppingStrategy:
+        description: Hopping strategy  used to overcome the bandwidth limitations
+          of the RF front-end (0:Sequential, 1:Random, 2:Similarity)
+        type: integer
+      iqBalanceCalibration:
+        description: True if IQ samples are balanced
+        type: boolean
+      rfSync:
+        description: 'Time synchronization of the radio frontend (0: none, 1: GPS,
+          2: Reference Clock, 5: Other)'
+        type: string
+      samplingRate:
+        description: Sensor's sampling rate in samples per second
+        type: integer
+      sigStrengthCalibration:
+        description: True if signal strength is calibrated
+        type: boolean
+      systemSync:
+        description: 'Time synchronization of the system (0: none, 1: GPS, 2: Reference
+          Clock, 3: NTP, 4: OpenSky, 5: Other)'
+        type: string
+    type: object
+  database.SampleTime:
+    properties:
+      microseconds:
+        description: Microseconds extension for the UNIX time stamp
+        type: integer
+      seconds:
+        description: Number of seconds since the UNIX epoch start on January 1st,
+          1970 at UTC
+        type: integer
+    type: object
   stats.Stats:
     properties:
       hostname:
@@ -105,6 +225,63 @@ paths:
       summary: Get an aggregated spectrum measurement from a list of nodes
       tags:
       - measurement
+  /campaigns:
+    get:
+      description: Returns a list of all recorded campaigns (that were successfully
+        started).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All recorded campaigns
+          schema:
+            items:
+              $ref: '#/definitions/database.Campaign'
+            type: array
+        "500":
+          description: Generally a database error
+      security:
+      - BasicAuth: []
+      summary: List campaigns
+      tags:
+      - data
+  /campaigns/{campaign_id}:
+    get:
+      description: Returns the campaign object corresponding to the given unique ID.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The campaign with the given ID
+          schema:
+            $ref: '#/definitions/database.Campaign'
+        "500":
+          description: Generally a database error
+      security:
+      - BasicAuth: []
+      summary: Get a single campaign object
+      tags:
+      - data
+  /campaigns/{campaign_id}/samples:
+    get:
+      description: Returns a list of all the samples recorded during a campaign by
+        the sensors partakin in said campaign.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All samples received during the campaign
+          schema:
+            items:
+              $ref: '#/definitions/database.Sample'
+            type: array
+        "500":
+          description: Generally a database error
+      security:
+      - BasicAuth: []
+      summary: Get all samples recorded during a specific campaign
+      tags:
+      - data
   /nodes:
     get:
       description: Returns a list of all connected nodes by their hardware ID. Will
@@ -125,14 +302,40 @@ paths:
       summary: List nodes
       tags:
       - administration
-  /nodes/{id}/stats:
+  /nodes/{sensor_id}/samples:
+    get:
+      description: Returns all samples received by the backend from the sensor with
+        the given ID.
+      parameters:
+      - description: Node hardware ID
+        in: path
+        name: sensor_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of samples received by the given sensor
+          schema:
+            items:
+              $ref: '#/definitions/database.Sample'
+            type: array
+        "500":
+          description: Generally a database error
+      security:
+      - BasicAuth: []
+      summary: Get all samples received from a specific node
+      tags:
+      - data
+  /nodes/{sensor_id}/stats:
     get:
       description: Returns full stats from the node with given hardware ID. Will time
         out in `300ms` if the node does not respond.
       parameters:
       - description: Node hardware ID
         in: path
-        name: id
+        name: sensor_id
         required: true
         type: string
       produces:
