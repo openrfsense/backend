@@ -4,25 +4,31 @@
 {{ template "views/partials/head" . }}
 
 <body>
-  {{ template "views/partials/header" . }}
-  <div class="container-xl">
-    <div class="row row-deck mt-4">
-      <div class="col-md-6">
-        {{ template "views/sensor/general" . }}
+  <div class="d-flex flex-column justify-content-start min-vh-100">
+    {{ template "views/partials/header" . }}
+    <div class="container-xl">
+      <div class="row row-deck mt-4">
+        <div class="col-md-6">
+          {{ template "views/sensor/general" . }}
+        </div>
+        <div class="col-md-6 mt-2 mt-md-0">
+          {{ template "views/sensor/location" . }}
+        </div>
       </div>
-      <div class="col-md-6 mt-2 mt-md-0">
-        {{ template "views/sensor/location" . }}
+      <div class="mt-2 mt-md-4">
+        {{ template "views/sensor/campaigns" . }}
       </div>
-    </div>
-    <div class="mt-2 mt-md-4">
-      {{ template "views/sensor/memory" . }}
-    </div>
-    <div class="mt-2 mt-md-4">
-      {{ template "views/sensor/fs" . }}
+      <div class="mt-2 mt-md-4">
+        {{ template "views/sensor/memory" . }}
+      </div>
+      <div class="mt-2 mt-md-4">
+        {{ template "views/sensor/fs" . }}
+      </div>
     </div>
   </div>
 
-  <script src="/static/map.js"></script>
+  {{ template "views/partials/footer" . }}
+  <script src="/static/sensor.js"></script>
 </body>
 
 </html>

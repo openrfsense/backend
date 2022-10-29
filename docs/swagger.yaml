@@ -265,7 +265,7 @@ paths:
   /campaigns/{campaign_id}/samples:
     get:
       description: Returns a list of all the samples recorded during a campaign by
-        the sensors partakin in said campaign.
+        the sensors partaking in said campaign.
       produces:
       - application/json
       responses:
@@ -302,6 +302,65 @@ paths:
       summary: List nodes
       tags:
       - administration
+  /nodes/{sensor_id}/campaigns:
+    get:
+      description: Returns all campaigns where the given sensor was requested to take
+        part in.
+      parameters:
+      - description: Node hardware ID
+        in: path
+        name: sensor_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of campaign the sensor took part in
+          schema:
+            items:
+              $ref: '#/definitions/database.Campaign'
+            type: array
+        "500":
+          description: Generally a database error
+      security:
+      - BasicAuth: []
+      summary: Get all campaigns a specific node took part in
+      tags:
+      - data
+  /nodes/{sensor_id}/campaigns/{campaign_id}:
+    get:
+      description: Returns all samples received by the given sensor and belonging
+        to the given campaign.
+      parameters:
+      - description: Node hardware ID
+        in: path
+        name: sensor_id
+        required: true
+        type: string
+      - description: Campaign ID
+        in: path
+        name: campaign_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of samples received by the given sensor during the given
+            campaign
+          schema:
+            items:
+              $ref: '#/definitions/database.Sample'
+            type: array
+        "500":
+          description: Generally a database error
+      security:
+      - BasicAuth: []
+      summary: Get all samples received from a specific sensor and belonging to a
+        specific campaign
+      tags:
+      - data
   /nodes/{sensor_id}/samples:
     get:
       description: Returns all samples received by the backend from the sensor with

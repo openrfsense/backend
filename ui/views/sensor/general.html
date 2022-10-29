@@ -6,35 +6,35 @@
     <div class="datagrid">
       <div class="datagrid-item">
         <div class="datagrid-title">Hostname</div>
-        <div class="datagrid-content">{{ .Hostname }}</div>
+        <div class="datagrid-content">{{ .stats.Hostname }}</div>
       </div>
       <div class="datagrid-item">
         <div class="datagrid-title">Hardware ID</div>
         <div class="datagrid-content">
-          <samp>{{ .ID }}</samp>
+          <samp>{{ .stats.ID }}</samp>
         </div>
       </div>
       <div class="datagrid-item">
         <div class="datagrid-title">Model</div>
-        <div class="datagrid-content">{{ .Model }}</div>
+        <div class="datagrid-content">{{ .stats.Model }}</div>
       </div>
       <div class="datagrid-item">
         <div class="datagrid-title">Uptime</div>
-        <div class="datagrid-content">{{ humanizeDuration .Uptime }} ({{ .Uptime }})</div>
+        <div class="datagrid-content">{{ humanizeDuration .stats.Uptime }} ({{ .stats.Uptime }})</div>
       </div>
       <div class="datagrid-item">
         <div class="datagrid-title">Sensor status</div>
         <div class="datagrid-content">
-          {{ if eq .Providers.sensor.status "FREE" }}
+          {{ if eq .stats.Providers.sensor.status "FREE" }}
           <span class="badge bg-success-lt me-1">
-          {{ else if eq .Providers.sensor.status "BUSY" }}
+          {{ else if eq .stats.Providers.sensor.status "BUSY" }}
           <span class="badge bg-yellow-lt me-1">
-          {{ else if eq .Providers.sensor.status "ERROR" }}
+          {{ else if eq .stats.Providers.sensor.status "ERROR" }}
           <span class="badge bg-danger-lt me-1">
           {{ else }}
           <span class="badge bg-secondary-lt me-1">
           {{ end }}
-          {{ title .Providers.sensor.status }}
+          {{ title .stats.Providers.sensor.status }}
           </span>
         </div>
       </div>

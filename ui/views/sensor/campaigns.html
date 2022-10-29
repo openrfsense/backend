@@ -1,0 +1,50 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Campaigns</h3>
+  </div>
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Campaign ID</th>
+          <th>Type</th>
+          <th>Begin</th>
+          <th>End</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range .campaigns }}
+        <tr>
+          <td class="text-muted">
+            <samp>{{ .CampaignId }}</samp>
+          </td>
+          <td class="text-muted">{{ .Type }}</td>
+          <td class="text-muted">{{ .Begin }}</td>
+          <td class="text-muted">{{ .End }}</td>
+          <td class="text-end">
+            <div class="dropdown position-static" data-bs-boundary="body">
+              <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Download</button>
+              <div class="dropdown-menu dropdown-menu-end">
+                <span class="dropdown-header">Download samples</span>
+                <a class="btn dropdown-item justify-content-start campaign-download"
+                  data-campaign-id="{{ .CampaignId }}" data-file-type="json"
+                  href="/api/v1/nodes/{{ $.stats.ID }}/campaigns/{{ .CampaignId }}"
+                  download="orfs_{{ $.stats.ID }}_{{ .CampaignId }}.json">
+                  <img class="icon dropdown-item-icon opacity-30" src="/static/icons/braces.svg" alt="JSON">
+                  JSON
+                </a>
+                <button class="btn dropdown-item justify-content-start campaign-download"
+                  data-campaign-id="{{ .CampaignId }}" data-file-type="raw" disabled>
+                  <img class="icon dropdown-item-icon opacity-30" src="/static/icons/chart-dots.svg" alt="Raw">
+                  Raw
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+</div>

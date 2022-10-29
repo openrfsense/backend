@@ -42,7 +42,7 @@ func NodesGet(ctx *fiber.Ctx) error {
 // @description Returns full stats from the node with given hardware ID. Will time out in `300ms` if the node does not respond.
 // @tags        administration
 // @security    BasicAuth
-// @param       sensor_id path string true "Node hardware ID"
+// @param       sensor_id   path string true "Node hardware ID"
 // @produce     json
 // @success     200 {object} stats.Stats "Full system statistics for the node associated to the given ID"
 // @failure     500 "When the internal timeout for information retrieval expires"
@@ -84,6 +84,74 @@ func NodeSamplesGet(ctx *fiber.Ctx) error {
 	err := database.Instance().
 		Model(&database.Sample{}).
 		Where("sensor_id = ?", id).
+		Find(&samples).
+		Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return ctx.JSON(samples)
+}
+
+// Get all campaigns a specific node took part in
+//
+// @summary     Get all campaigns a specific node took part in
+// @description Returns all campaigns where the given sensor was requested to take part in.
+// @tags        data
+// @security    BasicAuth
+// @param       sensor_id path string true "Node hardware ID"
+// @produce     json
+// @success     200 {array} database.Campaign "List of campaign the sensor took part in"
+// @failure     500 "Generally a database error"
+// @router      /nodes/{sensor_id}/campaigns [get]
+func NodeCampaignsGet(ctx *fiber.Ctx) error {
+	id := ctx.Params("sensor_id")
+	if id == "" {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+
+	campaigns := []database.Campaign{}
+	err := database.Instance().
+		Model(&database.Campaign{}).
+		Where("? = any (sensors)", id).
+		Find(&campaigns).
+		Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return ctx.JSON(campaigns)
+}
+
+// Get all samples received from a specific sensor and belonging to a specific campaign
+//
+// @summary     Get all samples received from a specific sensor and belonging to a specific campaign
+// @description Returns all samples received by the given sensor and belonging to the given campaign.
+// @tags        data
+// @security    BasicAuth
+// @param       sensor_id path string true "Node hardware ID"
+// @param       campaign_id path string true "Campaign ID"
+// @produce     json
+// @success     200 {array} database.Sample "List of samples received by the given sensor during the given campaign"
+// @failure     500 "Generally a database error"
+// @router      /nodes/{sensor_id}/campaigns/{campaign_id} [get]
+func NodeCampaignSamplesGet(ctx *fiber.Ctx) error {
+	sensorId := ctx.Params("sensor_id")
+	if sensorId == "" {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+
+	campaignId := ctx.Params("campaign_id")
+	if campaignId == "" {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+
+	samples := []database.Sample{}
+	err := database.Instance().
+		Model(&database.Sample{}).
+		Where("sensor_id = ? and campaign_id = ?", sensorId, campaignId).
 		Find(&samples).
 		Error
 	if err != nil {

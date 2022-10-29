@@ -2,7 +2,7 @@
   <div class="card-header">
     <h3 class="card-title">Storage</h3>
   </div>
-  {{ range .Providers.fs }}
+  {{ range .stats.Providers.fs }}
   <div class="card-body">
     <p class="mb-3">
       <samp>{{ .device }}</samp> mounted on <samp>{{ .mount }}</samp>

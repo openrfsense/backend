@@ -65,17 +65,21 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 
 	// Backend router for /api/v1
 	router.Route(prefix, func(router fiber.Router) {
+		// TODO: pass auth to UI or just rate limit these for unauthenticated requests
+		router.Get("/campaigns", CampaignsGet)
+		router.Get("/campaigns/:campaign_id", CampaignGet)
+		router.Get("/campaigns/:campaign_id/samples", CampaignSamplesGet)
+		router.Get("/nodes/:sensor_id/campaigns", NodeCampaignsGet)
+		router.Get("/nodes/:sensor_id/campaigns/:campaign_id", NodeCampaignSamplesGet)
+		router.Get("/nodes/:sensor_id/samples", NodeSamplesGet)
+
 		router.Use(basicauth.New(basicauth.Config{
 			Users: creds,
 		}))
 		router.Get("/nodes", NodesGet)
 		router.Get("/nodes/:sensor_id/stats", NodeStatsGet)
-		router.Get("/nodes/:sensor_id/samples", NodeSamplesGet)
 		router.Post("/aggregated", NodeAggregatedPost)
 		router.Post("/raw", NodeRawPost)
-		router.Get("/campaigns", CampaignsGet)
-		router.Get("/campaigns/:campaign_id", CampaignGet)
-		router.Get("/campaigns/:campaign_id/samples", CampaignSamplesGet)
 	})
 
 	// Setup documentation routes

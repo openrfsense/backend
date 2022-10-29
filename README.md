@@ -7,6 +7,7 @@ The backend is responsible for:
 ## Table of contents <!-- omit in toc -->
 - [OpenRFSense Backend](#openrfsense-backend)
     - [Usage and deployment](#usage-and-deployment)
+    - [Security](#security)
     - [Configuration](#configuration)
     - [API](#api)
     - [Metrics](#metrics)
@@ -64,6 +65,9 @@ networks:
   proxy:
   db:
 ```
+
+### Security
+Most of the API endpoints are locked behind [basic HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). It is strongly recommended that the default credentials be changed in the configuration file, under `backend.users`.
 
 ### Configuration
 > ⚠️ The configuration is still WIP: keys may change in the future

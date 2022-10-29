@@ -131,7 +131,7 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
-                "description": "Returns a list of all the samples recorded during a campaign by the sensors partakin in said campaign.",
+                "description": "Returns a list of all the samples recorded during a campaign by the sensors partaking in said campaign.",
                 "produces": [
                     "application/json"
                 ],
@@ -182,6 +182,93 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "When the internal timeout for information retrieval expires"
+                    }
+                }
+            }
+        },
+        "/nodes/{sensor_id}/campaigns": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns all campaigns where the given sensor was requested to take part in.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "Get all campaigns a specific node took part in",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Node hardware ID",
+                        "name": "sensor_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of campaign the sensor took part in",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Campaign"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Generally a database error"
+                    }
+                }
+            }
+        },
+        "/nodes/{sensor_id}/campaigns/{campaign_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns all samples received by the given sensor and belonging to the given campaign.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "Get all samples received from a specific sensor and belonging to a specific campaign",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Node hardware ID",
+                        "name": "sensor_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Campaign ID",
+                        "name": "campaign_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of samples received by the given sensor during the given campaign",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Sample"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Generally a database error"
                     }
                 }
             }

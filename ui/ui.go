@@ -13,6 +13,7 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
+	"github.com/openrfsense/backend/database"
 	"github.com/openrfsense/common/logging"
 )
 
@@ -68,25 +69,44 @@ func Init(router *fiber.App) {
 	)
 
 	router.Get("/", renderIndex)
-	router.Get("/sensor/:id", renderSensorPage)
+	router.Get("/sensor/:sensor_id", renderSensorPage)
 }
 
-func renderIndex(c *fiber.Ctx) error {
+func renderIndex(ctx *fiber.Ctx) error {
 	sensorStats, err := fetchAllSensorStats()
 	if err != nil {
 		return err
 	}
 
-	return c.Render("views/index", fiber.Map{
+	return ctx.Render("views/index", fiber.Map{
 		"sensors": sensorStats,
 	})
 }
 
-func renderSensorPage(c *fiber.Ctx) error {
-	stat, err := fetchSensorStats(c.Params("id"))
+func renderSensorPage(ctx *fiber.Ctx) error {
+	id := ctx.Params("sensor_id")
+	if id == "" {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+
+	stat, err := fetchSensorStats(id)
 	if err != nil {
 		return err
 	}
 
-	return c.Render("views/sensor", stat)
+	campaigns := []database.Campaign{}
+	err = database.Instance().
+		Model(&database.Campaign{}).
+		Where("? = any (sensors)", id).
+		Find(&campaigns).
+		Error
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return ctx.Render("views/sensor", fiber.Map{
+		"campaigns": campaigns,
+		"stats":     stat,
+	})
 }
