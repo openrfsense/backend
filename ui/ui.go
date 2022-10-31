@@ -30,7 +30,6 @@ var staticFs embed.FS
 // Initializes Fiber view engine with embedded HTML templates from views/
 func NewEngine() *html.Engine {
 	engine := html.NewFileSystem(http.FS(viewsFs), ".html")
-	engine.Reload(true)
 	engine.AddFunc("title", cases.Title(language.AmericanEnglish).String)
 	engine.AddFunc("percent", func(this float64, total float64) int {
 		part := this / total

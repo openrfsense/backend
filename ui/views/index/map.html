@@ -1,0 +1,13 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Locations</h3>
+  </div>
+  <div class="card-body p-0">
+    <div id="map" style="height: 50vh">
+      {{ range .sensors }}
+      <marker data-lon="{{ index .Providers.location.coordinates 0 }}"
+        data-lat="{{ index .Providers.location.coordinates 1 }}" />
+      {{ end }}
+    </div>
+  </div>
+</div>

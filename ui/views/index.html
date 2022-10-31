@@ -4,14 +4,21 @@
 {{ template "views/partials/head" . }}
 
 <body>
+  {{ template "views/index/alert" . }}
+  
   <div class="d-flex flex-column justify-content-start min-vh-100">
     {{ template "views/partials/header" . }}
     <div class="container-xl">
-      {{ template "views/index/table" . }}
+      <div class="mt-2 mt-md-4">
+        {{ template "views/index/table" . }}
+      </div>
+      <div class="mt-2 mt-md-4">
+        {{ template "views/index/map" . }}
+      </div>
     </div>
     {{ template "views/partials/footer" . }}
   </div>
-  
+
   {{ template "views/index/modal" . }}
   <script src="/static/index.js"></script>
 </body>

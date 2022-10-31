@@ -78,8 +78,8 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 		}))
 		router.Get("/nodes", NodesGet)
 		router.Get("/nodes/:sensor_id/stats", NodeStatsGet)
-		router.Post("/aggregated", NodeAggregatedPost)
-		router.Post("/raw", NodeRawPost)
+		router.Post("/aggregated", AggregatedPost)
+		router.Post("/raw", RawPost)
 	})
 
 	// Setup documentation routes

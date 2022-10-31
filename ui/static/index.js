@@ -29,22 +29,40 @@ checkboxes.forEach(sc => {
 // Prevent campaign form from redirecting, use REST instead
 var form = document.getElementById("campaign-form")
 form.addEventListener("submit", event => {
-    // Hide the modal if all is well (required fields will be handled
-    // by the browser)
-    bootstrap.Modal.getInstance("#modal-campaign").hide()
+    event.preventDefault()
 
     var data = Object.fromEntries(new FormData(event.target))
-
-    // Get selected/checked sensors from table
+    data.begin = new Date(`${data.startDate}T${data.startTime}`).toISOString(),
+    data.end = new Date(`${data.endDate}T${data.endTime}`).toISOString(),
     data.sensors = []
+    // Get selected/checked sensors from table
     checkboxes.forEach(cb => {
         if (cb.checked) data.sensors.push(cb.value)
     })
-    console.log(data)
 
-    event.preventDefault()
+    fetch(
+        data.measurementType === "raw" ? "/api/v1/raw" : "/api/v1/aggregated",
+        {
+            headers: { "Content-Type": "application/json" },
+            method: "post",
+            body: JSON.stringify(data),
+        }
+    ).then(response => {
+        if (!response.ok) {
+            document.getElementById("alert-error").classList.toggle("show", true)
+            document.getElementById("alert-success").classList.toggle("show", false)
+            return
+        }
+
+        // Hide the modal if all is well (required fields will be handled
+        // by the browser)
+        bootstrap.Modal.getInstance("#modal-campaign").hide()
+        document.getElementById("alert-error").classList.toggle("show", false)
+        document.getElementById("alert-success").classList.toggle("show", true)
+    })
 })
 
+// Raw measurement radio toggle in modal
 document.querySelector("input[value=raw]").addEventListener("change", () => {
     document.querySelectorAll("input.raw-disable").forEach(i => {
         i.disabled = true
@@ -52,9 +70,31 @@ document.querySelector("input[value=raw]").addEventListener("change", () => {
     })
 })
 
+// Sampled measurement radio toggle in modal
 document.querySelector("input[value=aggregated]").addEventListener("change", () => {
     document.querySelectorAll("input.raw-disable").forEach(i => {
         i.disabled = false
         i.required = true
     })
+})
+
+// Initialize the Leaflet map
+var map = L.map("map", {
+    center: [0, 0],
+    zoom: 3,
+    minZoom: 3
+})
+map.setMaxBounds([[-85.0511, -180], [85.0511, 180]])
+L.tileLayer(
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19,
+        noWrap: true,
+        attribution: `&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>`
+    }
+).addTo(map)
+// Add markers to map with simple DOM trick
+document.querySelectorAll("marker").forEach(m => {
+    var data = m.dataset
+    L.marker([data.lat, data.lon]).addTo(map)
 })

@@ -173,7 +173,7 @@ func NodeCampaignSamplesGet(ctx *fiber.Ctx) error {
 // @success     200 {array} stats.Stats "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information."
 // @failure     500 "When the internal timeout for information retrieval expires"
 // @router      /aggregated [post]
-func NodeAggregatedPost(ctx *fiber.Ctx) error {
+func AggregatedPost(ctx *fiber.Ctx) error {
 	amr := types.AggregatedMeasurementRequest{}
 	err := ctx.BodyParser(&amr)
 	if err != nil {
@@ -224,7 +224,7 @@ func NodeAggregatedPost(ctx *fiber.Ctx) error {
 // @success     200 {array} stats.Stats "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information."
 // @failure     500 "When the internal timeout for information retrieval expires"
 // @router      /raw [post]
-func NodeRawPost(ctx *fiber.Ctx) error {
+func RawPost(ctx *fiber.Ctx) error {
 	rmr := types.RawMeasurementRequest{}
 	err := ctx.BodyParser(&rmr)
 	if err != nil {
