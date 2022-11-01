@@ -2,7 +2,7 @@
 var selectAll = document.querySelector("input[name=sensors-all]")
 var checkboxes = document.querySelectorAll("input[name=sensor-checkbox]")
 
-selectAll.addEventListener("change", () => {
+selectAll.addEventListener("click", () => {
     checkboxes.forEach(sc => {
         sc.checked = selectAll.checked
         sc.dispatchEvent(new Event("change"))
@@ -20,9 +20,6 @@ checkboxes.forEach(sc => {
         } else {
             buttons.forEach(b => b.disabled = true)
         }
-
-        // If all checkboxes are ticked, also tick the "select all"
-        selectAll.checked = (checked === checkboxes.length)
     })
 })
 
@@ -85,6 +82,12 @@ var map = L.map("map", {
     minZoom: 3
 })
 map.setMaxBounds([[-85.0511, -180], [85.0511, 180]])
+// Add markers to map with simple DOM trick
+document.querySelectorAll("marker").forEach(m => {
+    var data = m.dataset
+    L.marker([data.lat, data.lon]).addTo(map).bindPopup(m.innerHTML)
+    m.remove()
+})
 L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
@@ -93,8 +96,3 @@ L.tileLayer(
         attribution: `&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>`
     }
 ).addTo(map)
-// Add markers to map with simple DOM trick
-document.querySelectorAll("marker").forEach(m => {
-    var data = m.dataset
-    L.marker([data.lat, data.lon]).addTo(map)
-})
