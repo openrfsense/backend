@@ -2,8 +2,8 @@
   <div class="card-header">
     <h3 class="card-title">Location</h3>
   </div>
-  <div class="card-body p-0 vh-40">
-    <div class="h-100" id="map" 
+  <div class="card-body p-0">
+    <div id="map" style="height: 40vh"
       data-lon="{{ index .stats.Providers.location.coordinates 0 }}"
       data-lat="{{ index .stats.Providers.location.coordinates 1 }}">
     </div>

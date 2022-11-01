@@ -27,7 +27,7 @@ var viewsFs embed.FS
 //go:embed static/*
 var staticFs embed.FS
 
-// Initializes Fiber view engine with embedded HTML templates from views/
+// Initializes Fiber view engine with embedded HTML templates from views/.
 func NewEngine() *html.Engine {
 	engine := html.NewFileSystem(http.FS(viewsFs), ".html")
 	engine.AddFunc("title", cases.Title(language.AmericanEnglish).String)
@@ -71,6 +71,35 @@ func Init(router *fiber.App) {
 	router.Get("/sensor/:sensor_id", renderSensorPage)
 }
 
+// A custom Fiber error handler which renders a simple web page.
+func ErrorHandler(ctx *fiber.Ctx, err error) error {
+	// Status code defaults to 500
+	code := fiber.StatusInternalServerError
+
+	// Retrieve the custom status code if it's an fiber.*Error
+	if e, ok := err.(*fiber.Error); ok {
+		code = e.Code
+	}
+
+	values := fiber.Map{
+		"code":    code,
+		"title":   "Oops… You just found an error page",
+		"message": "Try adjusting your search or filter to find what you're looking for.",
+	}
+
+	if code == http.StatusNotFound {
+		values["message"] = "Couldn't find what you were looking for."
+	}
+
+	err = ctx.Render("views/error", values)
+	if err != nil {
+		// In case the render fails
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
+	}
+
+	return nil
+}
+
 func renderIndex(ctx *fiber.Ctx) error {
 	sensorStats, err := fetchAllSensorStats()
 	if err != nil {
@@ -90,7 +119,7 @@ func renderSensorPage(ctx *fiber.Ctx) error {
 
 	stat, err := fetchSensorStats(id)
 	if err != nil {
-		return err
+		return fiber.ErrNotFound
 	}
 
 	campaigns := []database.Campaign{}

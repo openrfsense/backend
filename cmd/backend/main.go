@@ -73,6 +73,7 @@ func main() {
 	router := api.Start(konfig, "/api/v1", fiber.Config{
 		AppName:               "openrfsense-backend",
 		DisableStartupMessage: true,
+		ErrorHandler:          ui.ErrorHandler,
 		Views:                 ui.NewEngine(),
 	})
 	// Initialize UI (templated web pages)
