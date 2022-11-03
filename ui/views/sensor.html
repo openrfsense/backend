@@ -1,34 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+{{ template "views/partials/head" }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+  integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+  integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+<script src="/static/sensor.js" defer></script>
 
-{{ template "views/partials/head" . }}
+{{ template "views/partials/content" }}
 
-<body>
-  <div class="d-flex flex-column justify-content-start min-vh-100">
-    {{ template "views/partials/header" . }}
-    <div class="container-xl pt-2 pt-md-4">
-      <div class="row row-deck">
-        <div class="col-md-6">
-          {{ template "views/sensor/general" . }}
-        </div>
-        <div class="col-md-6 mt-2 mt-md-0">
-          {{ template "views/sensor/location" . }}
-        </div>
-      </div>
-      <div class="mt-2 mt-md-4">
-        {{ template "views/sensor/campaigns" . }}
-      </div>
-      <div class="mt-2 mt-md-4">
-        {{ template "views/sensor/memory" . }}
-      </div>
-      <div class="mt-2 mt-md-4">
-        {{ template "views/sensor/fs" . }}
-      </div>
-    </div>
+<div class="row row-deck mt-2 mt-md-4">
+  <div class="col-md-6">
+    {{ template "views/sensor/general" . }}
   </div>
+  <div class="col-md-6 mt-2 mt-md-0">
+    {{ template "views/sensor/location" . }}
+  </div>
+</div>
+<div class="mt-2 mt-md-4">
+  {{ template "views/sensor/campaigns" . }}
+</div>
+<div class="mt-2 mt-md-4">
+  {{ template "views/sensor/memory" . }}
+</div>
+<div class="mt-2 mt-md-4">
+  {{ template "views/sensor/fs" . }}
+</div>
 
-  {{ template "views/partials/footer" . }}
-  <script src="/static/sensor.js"></script>
-</body>
-
-</html>
+{{ template "views/partials/end" }}
