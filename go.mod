@@ -6,19 +6,21 @@ require (
 	github.com/arsmn/fiber-swagger/v2 v2.31.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gofiber/fiber/v2 v2.39.0
-	github.com/gofiber/helmet/v2 v2.2.17
+	github.com/gofiber/helmet/v2 v2.2.18
 	github.com/lib/pq v1.10.7
-	github.com/nats-io/nats-server/v2 v2.9.3
-	github.com/nats-io/nats.go v1.18.0
+	github.com/linkedin/goavro/v2 v2.12.0
+	github.com/nats-io/nats-server/v2 v2.9.5
+	github.com/nats-io/nats.go v1.19.0
 	github.com/openrfsense/common v0.0.0-20221027152913-3c313654df87
 	github.com/spf13/pflag v1.0.5
 	github.com/swaggo/swag v1.8.7
 	golang.org/x/text v0.4.0
 	gorm.io/driver/postgres v1.4.5
-	gorm.io/gorm v1.24.1-0.20221020061047-9d82aa567349
+	gorm.io/gorm v1.24.1
 )
 
 require (
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -48,7 +50,7 @@ require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/gofiber/template v1.7.1
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/klauspost/compress v1.15.11 // indirect
+	github.com/klauspost/compress v1.15.12 // indirect
 	github.com/knadh/koanf v1.4.4
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
@@ -60,7 +62,7 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.40.0 // indirect
+	github.com/valyala/fasthttp v1.41.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
 	golang.org/x/net v0.1.0 // indirect

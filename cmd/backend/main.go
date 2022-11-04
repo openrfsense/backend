@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/openrfsense/backend/api"
+	"github.com/openrfsense/backend/collector"
 	"github.com/openrfsense/backend/config"
 	"github.com/openrfsense/backend/database"
 	"github.com/openrfsense/backend/docs"
@@ -66,6 +67,13 @@ func main() {
 		log.Fatal(err)
 	}
 	defer nats.Disconnect()
+
+	log.Info("Starting measurement collector")
+	err = collector.Start(konfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer collector.Stop()
 
 	log.Info("Starting API")
 	docs.SwaggerInfo.Host = konfig.String("backend.host")

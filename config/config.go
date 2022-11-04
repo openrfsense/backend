@@ -17,6 +17,10 @@ type Backend struct {
 	Users   map[string]string `yaml:"users"`
 }
 
+type Collector struct {
+	Port int `yaml:"port"`
+}
+
 type Postgres struct {
 	Host         string   `yaml:"host"`
 	Port         int      `yaml:"port"`
@@ -34,15 +38,19 @@ type NATS struct {
 }
 
 type BackendConfig struct {
-	Backend  `yaml:"backend"`
-	Postgres `yaml:"postgres"`
-	NATS     `yaml:"nats"`
+	Backend   `yaml:"backend"`
+	Collector `yaml:"collector"`
+	Postgres  `yaml:"postgres"`
+	NATS      `yaml:"nats"`
 }
 
 var defaultConfig = BackendConfig{
 	Backend: Backend{
 		Metrics: true,
 		Port:    8080,
+	},
+	Collector: Collector{
+		Port: 2222,
 	},
 	Postgres: Postgres{
 		Host:         "localhost",

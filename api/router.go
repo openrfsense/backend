@@ -48,7 +48,7 @@ var swaggerConfig = swagger.Config{
 	TryItOutEnabled:        false,
 }
 
-// Create a router for the public API. Initializes all REST endpoints under the given prefix
+// Creates a router for the public API. Initializes all REST endpoints under the given prefix
 // and servers swagger documentation on /swagger.
 func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fiber.App {
 	creds := config.MustStringMap("backend.users")
