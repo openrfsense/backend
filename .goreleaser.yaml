@@ -52,11 +52,18 @@ nfpms:
     license: AGPLv3
     formats:
       - deb
+      - apk
+      - rpm
+      - archlinux
     version_metadata: git
     contents:
       - src: config.yml
-        dst: /etc/openrfsense/config.yml
+        dst: /etc/openrfsense/config.example.yml
         type: "config|noreplace"
+    deb:
+      lintian_overrides:
+        - statically-linked-binary
+        - changelog-file-missing-in-native-package
 
 dockers:
   - id: amd64

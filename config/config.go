@@ -34,7 +34,7 @@ type NATS struct {
 	Protocol string `yaml:"protocol"`
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
-	Secret   string `yaml:"secret"`
+	Token    string `yaml:"token"`
 }
 
 type BackendConfig struct {
