@@ -85,14 +85,20 @@ func Load(path string) (*koanf.Koanf, error) {
 		return nil, fmt.Errorf("error loading configuration file: %v (%T)", err, err)
 	}
 
-	_ = konf.Load(env.Provider("ORFS_", ".", formatEnv), nil)
+	_ = konf.Load(env.ProviderWithValue("ORFS_", ".", formatEnv), nil)
 
 	return konf, nil
 }
 
 // Formats environment variables: ORFS_SECTION_SUBSECTION_KEY becomes
 // (as a path) section.subsection.key
-func formatEnv(s string) string {
+func formatEnv(s string, v string) (string, interface{}) {
 	rawPath := strings.ToLower(strings.TrimPrefix(s, "ORFS_"))
-	return strings.Replace(rawPath, "_", ".", -1)
+	key := strings.Replace(rawPath, "_", ".", -1)
+
+	if strings.Contains(v, " ") {
+		return key, strings.Split(v, " ")
+	}
+
+	return key, v
 }
