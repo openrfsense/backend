@@ -188,10 +188,9 @@ func AggregatedPost(ctx *fiber.Ctx) error {
 	// Overwrite campaign ID
 	amr.CampaignId = id.Generate(9)
 
-	statsAll, err := nats.Ping[stats.Stats]("node.all", "node.get.all", nats.PingConfig{
+	statsAll, err := nats.Ping[stats.Stats]("node.all.aggregated", "node.get.all.aggregated", nats.PingConfig{
 		Message: amr,
 		HowMany: len(amr.Sensors),
-		Timeout: 100 * time.Millisecond,
 	})
 	if err != nil {
 		return err
@@ -239,10 +238,9 @@ func RawPost(ctx *fiber.Ctx) error {
 	// Overwrite campaign ID
 	rmr.CampaignId = id.Generate(9)
 
-	statsAll, err := nats.Ping[stats.Stats]("node.all", "node.get.all", nats.PingConfig{
+	statsAll, err := nats.Ping[stats.Stats]("node.all.raw", "node.get.all.raw", nats.PingConfig{
 		Message: rmr,
 		HowMany: len(rmr.Sensors),
-		Timeout: 100 * time.Millisecond,
 	})
 	if err != nil {
 		return err

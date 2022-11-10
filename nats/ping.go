@@ -28,6 +28,11 @@ func Ping[T any](subject string, reply string, config ...PingConfig) ([]T, error
 			return nil, err
 		}
 
+		// Early return if there are no subcribers to the subject
+		if nodes == 0 {
+			return []T{}, nil
+		}
+
 		cfg.HowMany = nodes
 	}
 
@@ -69,7 +74,7 @@ func Ping[T any](subject string, reply string, config ...PingConfig) ([]T, error
 			collector = append(collector, p)
 		case <-c.Done():
 			log.Debugf("Ping timeout for request %#v on %s -> %s", cfg, subject, reply)
-			err = fmt.Errorf("Ping timed out after %v for request on '%s'", cfg, subject)
+			err = fmt.Errorf("Ping timed out after %v for request on '%s'", cfg.Timeout, subject)
 		}
 	}
 

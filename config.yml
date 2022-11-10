@@ -6,6 +6,11 @@ backend:
   users:
     openrfsense: openrfsense
 
+# Collector service configuration
+collector:
+  # Port on which to wait for TCP packets
+  port: 2022
+
 # PostgreSQL database configuration
 postgres:
   host: localhost
