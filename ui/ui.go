@@ -82,6 +82,12 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 		code = e.Code
 	}
 
+	accept := ctx.Accepts("text/html", "application/json")
+	// Always try to send JSON response with error code and message
+	if accept != "text/html" {
+		return ctx.JSON(err)
+	}
+
 	values := fiber.Map{
 		"code":    code,
 		"title":   "Oops… You just found an error page",
