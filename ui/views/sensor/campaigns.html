@@ -24,7 +24,13 @@
           <td class="text-muted">{{ .End }}</td>
           <td class="text-end">
             <div class="dropdown position-static" data-bs-boundary="body">
+              {{ if timeIsBefore $.now .End }}
+              <button class="btn dropdown-toggle" data-bs-toggle="dropdown"
+                style="border-color: var(--tblr-btn-border-color);" disabled>Download</button>
+              {{ else }}
               <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Download</button>
+              {{ end }}
+              <!-- <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Download</button> -->
               <div class="dropdown-menu dropdown-menu-end">
                 <span class="dropdown-header">Download samples</span>
                 <a class="btn dropdown-item justify-content-start campaign-download"

@@ -46,6 +46,9 @@ func NewEngine() *html.Engine {
 	engine.AddFunc("humanizeSizeB", func(b float64) string {
 		return humanize.Bytes(uint64(b))
 	})
+	engine.AddFunc("timeIsBefore", func(t1, t2 time.Time) bool {
+		return t1.Before(t2)
+	})
 
 	return engine
 }
@@ -142,6 +145,7 @@ func renderSensorPage(ctx *fiber.Ctx) error {
 
 	return ctx.Render("views/sensor", fiber.Map{
 		"campaigns": campaigns,
+		"now":       time.Now(),
 		"stats":     stat,
 	})
 }
