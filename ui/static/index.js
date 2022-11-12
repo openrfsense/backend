@@ -29,8 +29,12 @@ form.addEventListener("submit", event => {
     event.preventDefault()
 
     var data = Object.fromEntries(new FormData(event.target))
-    data.begin = new Date(`${data.startDate}T${data.startTime}`).toISOString(),
-    data.end = new Date(`${data.endDate}T${data.endTime}`).toISOString(),
+    data.begin = Math.floor(
+        new Date(`${data.startDate}T${data.startTime}`).getTime()
+    )
+    data.end = Math.floor(
+        new Date(`${data.endDate}T${data.endTime}`).getTime()
+    )
     data.sensors = []
     // Get selected/checked sensors from table
     checkboxes.forEach(cb => {

@@ -200,8 +200,8 @@ func AggregatedPost(ctx *fiber.Ctx) error {
 		CampaignId: amr.CampaignId,
 		Sensors:    amr.Sensors,
 		Type:       "PSD",
-		Begin:      amr.Begin,
-		End:        amr.End,
+		Begin:      time.Unix(amr.Begin, 0),
+		End:        time.Unix(amr.End, 0),
 	}
 	err = database.Instance().Create(campaign).Error
 	if err != nil {
@@ -250,8 +250,8 @@ func RawPost(ctx *fiber.Ctx) error {
 		CampaignId: rmr.CampaignId,
 		Sensors:    rmr.Sensors,
 		Type:       "IQ",
-		Begin:      rmr.Begin,
-		End:        rmr.End,
+		Begin:      time.Unix(rmr.Begin, 0),
+		End:        time.Unix(rmr.End, 0),
 	}
 	err = database.Instance().Create(campaign).Error
 	if err != nil {
