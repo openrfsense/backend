@@ -3,17 +3,17 @@ package collector
 import (
 	"bufio"
 	"embed"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/knadh/koanf"
-	"github.com/linkedin/goavro/v2"
 	"github.com/openrfsense/backend/database"
 	"github.com/openrfsense/common/logging"
+
+	"github.com/hamba/avro/v2"
+	"github.com/knadh/koanf"
 )
 
 //go:embed sample.avsc
@@ -23,7 +23,7 @@ var (
 	listener *net.TCPListener
 	quitChan chan bool
 
-	codec *goavro.Codec
+	schema avro.Schema
 )
 
 var log = logging.New().
@@ -45,14 +45,12 @@ func Start(config *koanf.Koanf) error {
 
 	quitChan = make(chan bool, 1)
 
-	codecBytes, err := schemasFs.ReadFile("sample.avsc")
+	schemaBytes, err := schemasFs.ReadFile("sample.avsc")
 	if err != nil {
 		return err
 	}
-	codec, err = goavro.NewCodec(string(codecBytes))
-	if err != nil {
-		return err
-	}
+
+	schema = avro.MustParse(string(schemaBytes))
 
 	go accept()
 
@@ -109,20 +107,11 @@ func handleRequest(conn net.Conn) error {
 		return err
 	}
 
-	native, _, err := codec.NativeFromBinary(avroBytes)
-	if err != nil {
-		return err
-	}
-
-	textual, err := codec.TextualFromNative(nil, native)
-	if err != nil {
-		return err
-	}
-
 	sample := database.Sample{}
-	err = json.Unmarshal(textual, &sample)
+	err = avro.Unmarshal(schema, avroBytes[8:], &sample)
 	if err != nil {
 		return err
 	}
+
 	return database.Instance().Create(&sample).Error
 }

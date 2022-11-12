@@ -50,7 +50,7 @@ var defaultConfig = BackendConfig{
 		Port:    8080,
 	},
 	Collector: Collector{
-		Port: 2222,
+		Port: 2022,
 	},
 	Postgres: Postgres{
 		Host:         "localhost",

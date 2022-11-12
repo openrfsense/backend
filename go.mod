@@ -7,8 +7,8 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gofiber/fiber/v2 v2.39.0
 	github.com/gofiber/helmet/v2 v2.2.18
+	github.com/hamba/avro/v2 v2.1.0
 	github.com/lib/pq v1.10.7
-	github.com/linkedin/goavro/v2 v2.12.0
 	github.com/nats-io/nats-server/v2 v2.9.5
 	github.com/nats-io/nats.go v1.19.0
 	github.com/openrfsense/common v0.0.0-20221027152913-3c313654df87
@@ -20,7 +20,6 @@ require (
 )
 
 require (
-	github.com/golang/snappy v0.0.4 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -31,10 +30,13 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/rivo/uniseg v0.4.2 // indirect
 )
 

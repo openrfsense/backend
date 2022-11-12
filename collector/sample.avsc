@@ -1,7 +1,7 @@
 {
-  "name": "PSDSample",
+  "name": "Sample",
   "namespace": "org.openrfsense.avro.v3",
-  "doc": "Schema for PSD sample measurements",
+  "doc": "Schema for measurement samples",
   "type": "record",
   "fields": [
     {
@@ -17,8 +17,7 @@
     {
       "name": "sampleType",
       "doc": "Sample type string.",
-      "type": "string",
-      "default": "PSD"
+      "type": "string"
     },
     {
       "name": "config",
