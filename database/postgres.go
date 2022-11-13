@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/openrfsense/common/logging"
 	"gorm.io/driver/postgres"
@@ -22,7 +23,10 @@ var pg *gorm.DB
 func Init(config *koanf.Koanf) error {
 	var err error
 	conn := postgres.Open(generateConnString(config))
-	pg, err = gorm.Open(conn)
+	// Force timestamps to UTC
+	pg, err = gorm.Open(conn, &gorm.Config{
+		NowFunc: time.Now().UTC,
+	})
 	if err != nil {
 		return err
 	}

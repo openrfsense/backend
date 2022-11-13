@@ -19,10 +19,10 @@ type Campaign struct {
 	Type string `json:"type" gorm:"not null"`
 
 	// The time at which the campaign is supposed to start
-	Begin time.Time `json:"begin" gorm:"not null"`
+	Begin time.Time `json:"begin" gorm:"not null;type:timestamp with time zone"`
 
 	// The time at which the campaign will end
-	End time.Time `json:"end" gorm:"not null"`
+	End time.Time `json:"end" gorm:"not null;type:timestamp with time zone"`
 
 	// Database-oriented data
 	ID        uint       `gorm:"primary_key" json:"-"`
