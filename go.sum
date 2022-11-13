@@ -498,6 +498,10 @@ github.com/openrfsense/common v0.0.0-20221027152913-3c313654df87 h1:zxd72kMuGUzQ
 github.com/openrfsense/common v0.0.0-20221027152913-3c313654df87/go.mod h1:jdAszKR9g3Z8Aqs3mNxNgOyldwcIZ9oJVoLq5/ICACQ=
 github.com/openrfsense/common v0.0.0-20221112165906-9285deafe655 h1:het4Faf4R+ImBm1/ZSslLaoK49J5EEVpFgYEuisIHTc=
 github.com/openrfsense/common v0.0.0-20221112165906-9285deafe655/go.mod h1:0/646z/wpv28jm4a9JDGssbMbV3xTohiJDMAvfOPeCE=
+github.com/openrfsense/common v0.0.0-20221112173258-5703ae53390a h1:elG+rvMb9C7MtKYkM9OPYJZYYFBcR36EzLEWwxiWeH8=
+github.com/openrfsense/common v0.0.0-20221112173258-5703ae53390a/go.mod h1:0/646z/wpv28jm4a9JDGssbMbV3xTohiJDMAvfOPeCE=
+github.com/openrfsense/common v0.0.0-20221112173614-5de3f264fc4c h1:srDkE7lKKKYIeeg62NkwO1xGtQklK7MPZkSRA6xkPtg=
+github.com/openrfsense/common v0.0.0-20221112173614-5de3f264fc4c/go.mod h1:0/646z/wpv28jm4a9JDGssbMbV3xTohiJDMAvfOPeCE=
 github.com/otiai10/copy v1.7.0/go.mod h1:rmRl6QPdJj6EiUqXQ/4Nn2lLXoNQjFCQbbNrxgc/t3U=
 github.com/otiai10/curr v0.0.0-20150429015615-9b4961190c95/go.mod h1:9qAhocn7zKJG+0mI8eUu6xqkFDYS2kb2saOteoSB3cE=
 github.com/otiai10/curr v1.0.0/go.mod h1:LskTG5wDwr8Rs+nNQ+1LlxRjAtTZZjtJW4rMXl6j4vs=

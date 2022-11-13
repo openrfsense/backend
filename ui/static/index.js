@@ -30,11 +30,21 @@ form.addEventListener("submit", event => {
 
     var data = Object.fromEntries(new FormData(event.target))
     data.begin = Math.floor(
-        new Date(`${data.startDate}T${data.startTime}`).getTime()
+        new Date(`${data.startDate}T${data.startTime}`).getTime() / 1000
     )
     data.end = Math.floor(
-        new Date(`${data.endDate}T${data.endTime}`).getTime()
+        new Date(`${data.endDate}T${data.endTime}`).getTime() / 1000
     )
+    if (data.freqCenter)
+        data.freqCenter = parseInt(data.freqCenter, 10)
+    if (data.freqMin)
+        data.freqMin = parseInt(data.freqMin, 10)
+    if (data.freqMax)
+        data.freqMax = parseInt(data.freqMax, 10)
+    if (data.freqRes)
+        data.freqRes = parseInt(data.freqRes, 10)
+    if (data.timeRes)
+        data.timeRes = parseInt(data.timeRes, 10)
     data.sensors = []
     // Get selected/checked sensors from table
     checkboxes.forEach(cb => {
@@ -65,17 +75,29 @@ form.addEventListener("submit", event => {
 
 // Raw measurement radio toggle in modal
 document.querySelector("input[value=raw]").addEventListener("change", () => {
+    document.querySelectorAll(".aggregated-vanish").forEach(i => i.style.display = "")
+    document.querySelectorAll(".raw-vanish").forEach(i => i.style.display = "none")
     document.querySelectorAll("input.raw-disable").forEach(i => {
         i.disabled = true
         i.required = false
+    })
+    document.querySelectorAll("input.aggregated-disable").forEach(i => {
+        i.disabled = false
+        i.required = true
     })
 })
 
 // Sampled measurement radio toggle in modal
 document.querySelector("input[value=aggregated]").addEventListener("change", () => {
+    document.querySelectorAll(".aggregated-vanish").forEach(i => i.style.display = "none")
+    document.querySelectorAll(".raw-vanish").forEach(i => i.style.display = "")
     document.querySelectorAll("input.raw-disable").forEach(i => {
         i.disabled = false
         i.required = true
+    })
+    document.querySelectorAll("input.aggregated-disable").forEach(i => {
+        i.disabled = true
+        i.required = false
     })
 })
 

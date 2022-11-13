@@ -41,7 +41,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-body">
+      <div class="modal-body raw-vanish" style="display: none;">
         <div class="row">
           <div class="col-lg-4">
             <div class="mb-3">
@@ -81,6 +81,18 @@
           </div>
         </div>
       </div>
+      <div class="modal-body aggregated-vanish" style="display: none;">
+        <div class="mb-3">
+          <label class="form-label">Center frequency</label>
+          <div class="input-group">
+            <input type="number" min="1" class="form-control aggregated-disable" autocomplete="off" name="freqCenter"
+              form="campaign-form" required>
+            <span class="input-group-text">
+              Hz
+            </span>
+          </div>
+        </div>
+      </div>
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">Start</label>
@@ -104,10 +116,10 @@
             </div>
           </div>
         </div>
-        <div class="mb-3">
+        <div class="mb-3 raw-vanish">
           <label class="form-label">Time resolution</label>
           <div class="input-group">
-            <input type="number" min="1" class="form-control raw-disable" autocomplete="off" form="campaign-form"
+            <input type="number" min="1" class="form-control raw-disable" name="timeRes" autocomplete="off" form="campaign-form"
               required>
             <span class="input-group-text">
               seconds

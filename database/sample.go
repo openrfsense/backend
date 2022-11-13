@@ -54,7 +54,7 @@ type SampleConfig struct {
 	AntennaGain *float32 `json:"antennaGain,omitempty" avro:"antennaGain"`
 
 	// Identifier for the antenna being used if device has multiple antennas
-	AntennaID *string `json:"antennaId,omitempty" avro:"antennaId"`
+	AntennaID *int `json:"antennaId,omitempty" avro:"antennaId"`
 
 	// Center frequency in Hz to which the RF front-end was tuned to while recording the associated spectrum data
 	CenterFreq int64 `json:"centerFreq" avro:"centerFreq"`
@@ -69,16 +69,16 @@ type SampleConfig struct {
 	FrontendGain *float32 `json:"frontendGain,omitempty" avro:"frontendGain"`
 
 	// Hopping strategy  used to overcome the bandwidth limitations of the RF front-end (0:Sequential, 1:Random, 2:Similarity)
-	HoppingStrategy *int32 `json:"hoppingStrategy,omitempty" avro:"hoppingStrategy"`
+	HoppingStrategy *int `json:"hoppingStrategy,omitempty" avro:"hoppingStrategy"`
 
 	// True if IQ samples are balanced
 	IqBalanceCalibration *bool `json:"iqBalanceCalibration,omitempty" avro:"iqBalanceCalibration"`
 
 	// Time synchronization of the radio frontend (0: none, 1: GPS, 2: Reference Clock, 5: Other)
-	RFSync *string `json:"rfSync,omitempty" avro:"rfSync"`
+	RFSync *int32 `json:"rfSync,omitempty" avro:"rfSync"`
 
 	// Sensor's sampling rate in samples per second
-	SamplingRate *int32 `json:"samplingRate,omitempty" avro:"samplingRate"`
+	SamplingRate *int `json:"samplingRate,omitempty" avro:"samplingRate"`
 
 	// True if signal strength is calibrated
 	SigStrengthCalibration *bool `json:"sigStrengthCalibration,omitempty" avro:"sigStrengthCalibration"`

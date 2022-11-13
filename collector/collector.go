@@ -108,7 +108,7 @@ func handleRequest(conn net.Conn) error {
 	}
 
 	sample := database.Sample{}
-	err = avro.Unmarshal(schema, avroBytes[8:], &sample)
+	err = avro.Unmarshal(schema, avroBytes, &sample)
 	if err != nil {
 		return err
 	}
