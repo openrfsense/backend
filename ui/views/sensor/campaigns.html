@@ -6,7 +6,7 @@
     <table class="table card-table table-vcenter">
       <thead>
         <tr>
-          <th>Campaign ID</th>
+          <th class="w-1">Campaign ID</th>
           <th>Type</th>
           <th>Begin</th>
           <th>End</th>
@@ -20,17 +20,22 @@
             <samp>{{ .CampaignId }}</samp>
           </td>
           <td class="text-muted">{{ .Type }}</td>
-          <td class="text-muted">{{ .Begin }}</td>
-          <td class="text-muted">{{ .End }}</td>
+          <td class="text-muted">{{ humanizeDate .Begin }}</td>
+          <td class="text-muted">{{ humanizeDate .End }}</td>
           <td class="text-end">
             <div class="dropdown position-static" data-bs-boundary="body">
               {{ if timeIsBefore $.now .End }}
               <button class="btn dropdown-toggle" data-bs-toggle="dropdown"
-                style="border-color: var(--tblr-btn-border-color);" disabled>Download</button>
+                style="border-color: var(--tblr-btn-border-color);" disabled>
+                <img class="icon opacity-80" src="/static/icons/download.svg" alt="Download">
+                <span class="d-none d-md-inherit">Download</span>
+              </button>
               {{ else }}
-              <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Download</button>
+              <button class="btn dropdown-toggle" data-bs-toggle="dropdown">
+                <img class="icon opacity-80" src="/static/icons/download.svg" alt="Download">
+                <span class="d-none d-md-inline">Download</span>
+              </button>
               {{ end }}
-              <!-- <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Download</button> -->
               <div class="dropdown-menu dropdown-menu-end">
                 <span class="dropdown-header">Download samples</span>
                 <a class="btn dropdown-item justify-content-start campaign-download"

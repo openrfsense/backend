@@ -36,6 +36,9 @@ func NewEngine() *html.Engine {
 		part := this / total
 		return int(part * 100)
 	})
+	engine.AddFunc("humanizeDate", func(t time.Time) string {
+		return t.Format("Mon, 02 Jan 2006 15:04:05")
+	})
 	engine.AddFunc("humanizeDuration", func(span time.Duration) string {
 		now := time.Now()
 		return humanize.RelTime(now.Add(-span), now, "", "")

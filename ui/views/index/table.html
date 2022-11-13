@@ -10,7 +10,7 @@
   </div>
 
   <div class="card-table table-responsive">
-    <table class="table table-vcenter">
+    <table class="table table-vcenter" style="height: 1px;">
       <thead>
         <tr>
           <th class="w-1">
@@ -27,9 +27,11 @@
       <tbody>
         {{ range .sensors }}
         <tr>
-          <td>
-            <input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select sensor"
-              autocomplete="off" name="sensor-checkbox" value="{{ .ID }}">
+          <td class="p-0 h-100">
+            <label class="h-100 w-100 d-flex justify-content-center align-items-center" style="padding-left: .75rem;">
+              <input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select sensor"
+                autocomplete="off" name="sensor-checkbox" value="{{ .ID }}">
+            </label>
           </td>
           <td>{{ .Hostname }}</td>
           <td class="text-muted d-none d-md-table-cell">
@@ -50,7 +52,10 @@
             </span>
           </td>
           <td>
-            <a href="/sensor/{{ .ID }}" class="btn">View</a>
+            <a href="/sensor/{{ .ID }}" class="btn d-none d-md-inline-flex">View</a>
+            <a href="/sensor/{{ .ID }}" class="btn btn-icon d-md-none">
+              <img class="icon opacity-80" src="/static/icons/chevron-right.svg" alt="View">
+            </a>
           </td>
         </tr>
         {{ end }}
