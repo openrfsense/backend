@@ -31,14 +31,6 @@ var (
 		WithFlags(logging.FlagsDevelopment)
 )
 
-// @title                     OpenRFSense backend API
-// @description               OpenRFSense backend API
-// @contact.name              OpenRFSense
-// @contact.url               https://github.com/openrfsense/backend/issues
-// @license.name              AGPLv3
-// @license.url               https://spdx.org/licenses/AGPL-3.0-or-later.html
-// @BasePath                  /api/v1
-// @securityDefinitions.basic BasicAuth
 func main() {
 	configPath := pflag.StringP("config", "c", "config.yml", "path to yaml config file")
 	showVersion := pflag.BoolP("version", "v", false, "shows program version and build info")
@@ -84,6 +76,7 @@ func main() {
 		ErrorHandler:          ui.ErrorHandler,
 		Views:                 ui.NewEngine(),
 	})
+
 	// Initialize UI (templated web pages)
 	ui.Init(router)
 	defer func() {

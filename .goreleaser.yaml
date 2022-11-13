@@ -1,7 +1,7 @@
 before:
   hooks:
     - go mod tidy
-    - swag init --pd --parseDepth 2 -g cmd/backend/main.go -o ./docs
+    - swag init --pd --parseDepth 2 -g api/router.go -o ./docs
     - swag fmt -d cmd/backend,api
 checksum:
   name_template: "checksums.txt"
@@ -54,16 +54,11 @@ nfpms:
       - deb
       - apk
       - rpm
-      - archlinux
     version_metadata: git
     contents:
       - src: config.yml
-        dst: /etc/openrfsense/config.example.yml
+        dst: /usr/openrfsense/config.example.yml
         type: "config|noreplace"
-    deb:
-      lintian_overrides:
-        - statically-linked-binary
-        - changelog-file-missing-in-native-package
 
 dockers:
   - id: amd64
@@ -86,7 +81,7 @@ dockers:
       - "--label=org.opencontainers.image.title=OpenRFSense Backend"
       - "--label=org.opencontainers.image.description=OpenRFSense self-hostable server backend"
       - "--label=org.opencontainers.image.url=https://github.com/openrfsense/backend"
-      - "--label=org.opencontainers.image.documentation=https://github.com/openrfsense/backend"
+      - "--label=org.opencontainers.image.documentation=https://openrfsense.github.io/docs/backend"
       - "--label=org.opencontainers.image.vendor=OpenRFSense"
       - "--label=org.opencontainers.image.licenses=AGPL-3.0"
       - "--label=org.opencontainers.image.source=https://github.com/openrfsense/backend"
@@ -112,7 +107,7 @@ dockers:
       - "--label=org.opencontainers.image.title=OpenRFSense Backend"
       - "--label=org.opencontainers.image.description=OpenRFSense self-hostable server backend"
       - "--label=org.opencontainers.image.url=https://github.com/openrfsense/backend"
-      - "--label=org.opencontainers.image.documentation=https://github.com/openrfsense/backend"
+      - "--label=org.opencontainers.image.documentation=https://openrfsense.github.io/docs/backend"
       - "--label=org.opencontainers.image.vendor=OpenRFSense"
       - "--label=org.opencontainers.image.licenses=AGPL-3.0"
       - "--label=org.opencontainers.image.source=https://github.com/openrfsense/backend"

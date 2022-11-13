@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 
-	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -12,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/helmet/v2"
+	"github.com/gofiber/swagger"
 	"github.com/knadh/koanf"
 
 	_ "github.com/openrfsense/backend/docs"
@@ -24,7 +24,7 @@ var log = logging.New().
 	WithFlags(logging.FlagsDevelopment)
 
 var swaggerConfig = swagger.Config{
-	Title:  "Swagger UI",
+	Title:  "OpenRFSense API",
 	Layout: "BaseLayout",
 	Plugins: []template.JS{
 		template.JS("SwaggerUIBundle.plugins.DownloadUrl"),
@@ -40,13 +40,21 @@ var swaggerConfig = swagger.Config{
 	DocExpansion:             "list",
 	SyntaxHighlight: &swagger.SyntaxHighlightConfig{
 		Activate: true,
-		Theme:    "agate",
+		Theme:    "nord",
 	},
 	ShowCommonExtensions:   true,
-	ShowMutatedRequest:     true,
 	SupportedSubmitMethods: []string{},
 	TryItOutEnabled:        false,
 }
+
+// @title                     OpenRFSense backend API
+// @description               OpenRFSense backend API
+// @contact.name              OpenRFSense
+// @contact.url               https://github.com/openrfsense/backend/issues
+// @license.name              AGPLv3
+// @license.url               https://spdx.org/licenses/AGPL-3.0-or-later.html
+// @BasePath                  /api/v1
+// @securityDefinitions.basic BasicAuth
 
 // Creates a router for the public API. Initializes all REST endpoints under the given prefix
 // and servers swagger documentation on /swagger.
@@ -66,26 +74,24 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 	// Backend router for /api/v1
 	router.Route(prefix, func(router fiber.Router) {
 		// TODO: pass auth to UI or just rate limit these for unauthenticated requests
+		router.Use(
+			basicauth.New(basicauth.Config{
+				Users: creds,
+			}),
+		)
 		router.Get("/campaigns", CampaignsGet)
 		router.Get("/campaigns/:campaign_id", CampaignGet)
 		router.Get("/campaigns/:campaign_id/samples", CampaignSamplesGet)
+		router.Get("/nodes/:sensor_id/stats", NodeStatsGet)
 		router.Get("/nodes/:sensor_id/campaigns", NodeCampaignsGet)
 		router.Get("/nodes/:sensor_id/campaigns/:campaign_id", NodeCampaignSamplesGet)
 		router.Get("/nodes/:sensor_id/samples", NodeSamplesGet)
-
-		router.Use(basicauth.New(basicauth.Config{
-			Users: creds,
-		}))
 		router.Get("/nodes", NodesGet)
-		router.Get("/nodes/:sensor_id/stats", NodeStatsGet)
 		router.Post("/aggregated", AggregatedPost)
 		router.Post("/raw", RawPost)
 	})
 
 	// Setup documentation routes
-	router.Get("/api/docs", func(c *fiber.Ctx) error {
-		return c.Redirect("/api/docs/index.html")
-	})
 	router.Get("/api/docs/*", swagger.New(swaggerConfig))
 
 	// Metrics page and API, but only if enabled in configuration

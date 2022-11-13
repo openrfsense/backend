@@ -455,14 +455,6 @@ const docTemplate = `{
                 "deletedAt": {
                     "type": "string"
                 },
-                "lossRate": {
-                    "description": "Sample loss rate in percent",
-                    "type": "number"
-                },
-                "obfuscation": {
-                    "description": "Method used to obfuscate IQ spectrum data",
-                    "type": "string"
-                },
                 "sampleType": {
                     "description": "Sample type string (IQ, PSD, DEC)",
                     "type": "string"
@@ -489,7 +481,7 @@ const docTemplate = `{
                 },
                 "antennaId": {
                     "description": "Identifier for the antenna being used if device has multiple antennas",
-                    "type": "string"
+                    "type": "integer"
                 },
                 "centerFreq": {
                     "description": "Center frequency in Hz to which the RF front-end was tuned to while recording the associated spectrum data",
@@ -522,7 +514,7 @@ const docTemplate = `{
                 },
                 "rfSync": {
                     "description": "Time synchronization of the radio frontend (0: none, 1: GPS, 2: Reference Clock, 5: Other)",
-                    "type": "string"
+                    "type": "integer"
                 },
                 "samplingRate": {
                     "description": "Sensor's sampling rate in samples per second",
@@ -581,16 +573,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "begin": {
-                    "description": "Start time in ISO 8601",
-                    "type": "string"
+                    "description": "Start time in Unix epoch (seconds elapsed since January 1, 1970 UTC)",
+                    "type": "integer"
                 },
                 "campaignId": {
                     "description": "Campaign ID. For internal use only, will be ignored if not null",
                     "type": "string"
                 },
                 "end": {
-                    "description": "End time in ISO 8601",
-                    "type": "string"
+                    "description": "End time in Unix epoch (seconds elapsed since January 1, 1970 UTC)",
+                    "type": "integer"
                 },
                 "freqMax": {
                     "description": "Upper bound for frequency in Hz",
@@ -621,16 +613,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "begin": {
-                    "description": "Start time in ISO 8601",
-                    "type": "string"
+                    "description": "Start time in Unix epoch (seconds elapsed since January 1, 1970 UTC)",
+                    "type": "integer"
                 },
                 "campaignId": {
                     "description": "Campaign ID. For internal use only, will be ignored if not null",
                     "type": "string"
                 },
                 "end": {
-                    "description": "End time in ISO 8601",
-                    "type": "string"
+                    "description": "End time in Unix epoch (seconds elapsed since January 1, 1970 UTC)",
+                    "type": "integer"
+                },
+                "freqCenter": {
+                    "description": "Center frequency for measurement",
+                    "type": "integer"
                 },
                 "sensors": {
                     "description": "List of sensor hardware IDs to run the measurement campaign on",
