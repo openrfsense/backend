@@ -1,8 +1,6 @@
 package api
 
 import (
-	"time"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/openrfsense/backend/database"
 	"github.com/openrfsense/backend/nats"
@@ -31,6 +29,7 @@ func AggregatedPost(ctx *fiber.Ctx) error {
 
 	err = amr.Validate()
 	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
 		return err
 	}
 
@@ -49,8 +48,8 @@ func AggregatedPost(ctx *fiber.Ctx) error {
 		CampaignId: amr.CampaignId,
 		Sensors:    amr.Sensors,
 		Type:       "PSD",
-		Begin:      time.Unix(amr.Begin, 0),
-		End:        time.Unix(amr.End, 0),
+		Begin:      amr.Begin,
+		End:        amr.End,
 	}
 	err = database.Instance().Create(campaign).Error
 	if err != nil {
@@ -81,6 +80,7 @@ func RawPost(ctx *fiber.Ctx) error {
 
 	err = rmr.Validate()
 	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
 		return err
 	}
 
@@ -99,8 +99,8 @@ func RawPost(ctx *fiber.Ctx) error {
 		CampaignId: rmr.CampaignId,
 		Sensors:    rmr.Sensors,
 		Type:       "IQ",
-		Begin:      time.Unix(rmr.Begin, 0),
-		End:        time.Unix(rmr.End, 0),
+		Begin:      rmr.Begin,
+		End:        rmr.End,
 	}
 	err = database.Instance().Create(campaign).Error
 	if err != nil {

@@ -11,7 +11,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/nats-io/nats-server/v2 v2.9.5
 	github.com/nats-io/nats.go v1.19.0
-	github.com/openrfsense/common v0.0.0-20221112173614-5de3f264fc4c
+	github.com/openrfsense/common v0.0.0-20221113152023-da2079575705
 	github.com/spf13/pflag v1.0.5
 	github.com/swaggo/swag v1.8.7
 	golang.org/x/text v0.4.0

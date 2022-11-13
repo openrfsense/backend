@@ -66,7 +66,6 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 	// TODO: rate limiting?
 	router.Use(
 		helmet.New(),
-		logger.New(),
 		recover.New(),
 		requestid.New(),
 	)
@@ -75,6 +74,7 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 	router.Route(prefix, func(router fiber.Router) {
 		// TODO: pass auth to UI or just rate limit these for unauthenticated requests
 		router.Use(
+			logger.New(),
 			basicauth.New(basicauth.Config{
 				Users: creds,
 			}),

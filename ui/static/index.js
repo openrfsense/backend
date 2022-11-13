@@ -29,12 +29,8 @@ form.addEventListener("submit", event => {
     event.preventDefault()
 
     var data = Object.fromEntries(new FormData(event.target))
-    data.begin = Math.floor(
-        new Date(`${data.startDate}T${data.startTime}`).getTime() / 1000
-    )
-    data.end = Math.floor(
-        new Date(`${data.endDate}T${data.endTime}`).getTime() / 1000
-    )
+    data.begin = new Date(`${data.startDate}T${data.startTime}`).toISOString()
+    data.end = new Date(`${data.endDate}T${data.endTime}`).toISOString()
     if (data.freqCenter)
         data.freqCenter = parseInt(data.freqCenter, 10)
     if (data.freqMin)
@@ -54,7 +50,9 @@ form.addEventListener("submit", event => {
     fetch(
         data.measurementType === "raw" ? "/api/v1/raw" : "/api/v1/aggregated",
         {
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json"
+            },
             method: "post",
             body: JSON.stringify(data),
         }

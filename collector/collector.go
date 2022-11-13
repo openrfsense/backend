@@ -11,6 +11,7 @@ import (
 
 	"github.com/openrfsense/backend/database"
 	"github.com/openrfsense/common/logging"
+	"github.com/valyala/tcplisten"
 
 	"github.com/hamba/avro/v2"
 	"github.com/knadh/koanf"
@@ -20,8 +21,9 @@ import (
 var schemasFs embed.FS
 
 var (
-	listener *net.TCPListener
+	listener net.Listener
 	quitChan chan bool
+	errors   chan error
 
 	schema avro.Schema
 )
@@ -34,25 +36,29 @@ var log = logging.New().
 // Initializes an internal TCP listener on the configured port and starts an accept loop
 // which waits for TCP packets (in Avro binary format).
 func Start(config *koanf.Koanf) error {
-	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", config.MustInt("collector.port")))
-	if err != nil {
-		return err
-	}
-	listener, err = net.ListenTCP("tcp", addr)
+	var err error
+
+	conf := &tcplisten.Config{}
+	listener, err = conf.NewListener("tcp4", fmt.Sprintf(":%d", config.MustInt("collector.port")))
 	if err != nil {
 		return err
 	}
 
 	quitChan = make(chan bool, 1)
+	errors = make(chan error, 2)
 
+	// Initialize schema
 	schemaBytes, err := schemasFs.ReadFile("sample.avsc")
 	if err != nil {
 		return err
 	}
-
 	schema = avro.MustParse(string(schemaBytes))
 
-	go accept()
+	// Start error logger
+	go errorLogger(errors)
+
+	// Start the accept loop
+	go accept(errors)
 
 	return nil
 }
@@ -62,8 +68,12 @@ func Stop() {
 	quitChan <- true
 }
 
+func Errors() <-chan error {
+	return errors
+}
+
 // The actual accept loop.
-func accept() {
+func accept(errChan chan<- error) {
 	wg := sync.WaitGroup{}
 
 	for {
@@ -74,25 +84,25 @@ func accept() {
 			return
 		default:
 		}
-		err := listener.SetDeadline(time.Now().Add(1e9))
-		if err != nil {
-			log.Errorf("Deadline: %v", err)
-			continue
-		}
-		conn, err := listener.AcceptTCP()
+		// Block and accept a connection
+		conn, err := listener.Accept()
 		if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
+			errChan <- err
 			continue
 		}
+		// Set an arbitrary 300ms deadline on the current packet
+		err = conn.SetDeadline(time.Now().Add(300 * time.Millisecond))
 		if err != nil {
-			log.Errorf("AcceptTCP: %v", err)
-			continue
+			errChan <- err
 		}
+
+		// Start worker process
 		wg.Add(1)
 		go func() {
 			wg.Done()
 			err = handleRequest(conn)
 			if err != nil {
-				log.Error(err)
+				errChan <- err
 			}
 		}()
 	}
@@ -114,4 +124,12 @@ func handleRequest(conn net.Conn) error {
 	}
 
 	return database.Instance().Create(&sample).Error
+}
+
+// Simple consumer which logs error received on a channel.
+func errorLogger(errChan <-chan error) {
+	for {
+		err := <-errChan
+		log.Error(err)
+	}
 }
