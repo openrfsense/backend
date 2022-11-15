@@ -7,13 +7,12 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
-	natsgo "github.com/nats-io/nats.go"
 
 	"github.com/openrfsense/common/logging"
 )
 
 var (
-	natsConn   *natsgo.EncodedConn
+	natsConn   *nats.EncodedConn
 	natsServer *server.Server
 
 	log = logging.New().
@@ -46,34 +45,9 @@ func Start(config *koanf.Koanf, options ...server.Options) error {
 	}
 
 	// Create a default client connected to the embedded server
-	c, err := natsgo.Connect(
-		natsServer.ClientURL(),
-		nats.Token(token),
-	)
-	if err != nil {
-		return err
-	}
+	natsConn, err = startClient(natsServer.ClientURL(), token, nats.JSON_ENCODER)
 
-	natsConn, err = natsgo.NewEncodedConn(c, natsgo.JSON_ENCODER)
 	return err
-}
-
-func startServer(opts *server.Options) (*server.Server, error) {
-	s, err := server.NewServer(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	go func() {
-		s.Start()
-		s.WaitForShutdown()
-	}()
-
-	if !s.ReadyForConnections(100 * time.Millisecond) {
-		return nil, ErrNotReady
-	}
-
-	return s, nil
 }
 
 // Returns the number of subscribers on a given subject.
@@ -90,12 +64,31 @@ func Presence(subject string) (int, error) {
 }
 
 // Returns the default internal client.
-func Conn() *natsgo.EncodedConn {
+func Conn() *nats.EncodedConn {
 	return natsConn
 }
 
-// Drain and close the internal NATS connection.
+// Drains and closes the connection to the embedded NATS server.
 func Disconnect() {
 	_ = natsConn.Drain()
 	natsConn.Close()
+}
+
+// Creates server object and starts it in a goroutine.
+func startServer(opts *server.Options) (*server.Server, error) {
+	s, err := server.NewServer(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		s.Start()
+		s.WaitForShutdown()
+	}()
+
+	if !s.ReadyForConnections(100 * time.Millisecond) {
+		return nil, ErrNotReady
+	}
+
+	return s, nil
 }
