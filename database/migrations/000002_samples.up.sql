@@ -1,0 +1,23 @@
+create table if not exists samples (
+    "id" serial primary key,
+    "sensor_id" text not null,
+    "campaign_id" text not null,
+    "sample_type" text not null,
+    "time_seconds" numeric not null,
+    "time_microseconds" numeric not null,
+    "config_antenna_gain" numeric,
+    "config_antenna_id" numeric,
+    "config_center_freq" numeric not null,
+    "config_est_noise_floor" numeric,
+    "config_frequency_correction_factor" numeric,
+    "config_frontend_gain" numeric,
+    "config_hopping_strategy" numeric,
+    "config_iq_balance_calibration" boolean,
+    "config_rf_sync" numeric,
+    "config_sampling_rate" numeric,
+    "config_sig_strength_calibration" boolean,
+    "config_system_sync" text,
+    "config_extra_conf" json,
+    "data" numeric[] not null,
+    "created_at" timestamp default now()
+);

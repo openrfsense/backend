@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"embed"
 	"net/http"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/openrfsense/backend/database"
+	"github.com/openrfsense/backend/database/models"
 	"github.com/openrfsense/common/logging"
 )
 
@@ -135,14 +137,16 @@ func renderSensorPage(ctx *fiber.Ctx) error {
 		return fiber.ErrNotFound
 	}
 
-	campaigns := []database.Campaign{}
-	err = database.Instance().
-		Model(&database.Campaign{}).
+	sql, args, _ := database.Instance().Select("*").
+		From("campaigns").
 		Where("? = any (sensors)", id).
-		Find(&campaigns).
-		Error
+		ToSql()
+	campaigns, err := database.Multiple[models.Campaign](
+		context.Background(),
+		sql,
+		args...,
+	)
 	if err != nil {
-		log.Error(err)
 		return err
 	}
 

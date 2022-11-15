@@ -1,93 +1,52 @@
 package api
 
 import (
-	"net/http"
+	"context"
+	"strings"
+
+	"github.com/openrfsense/backend/database"
+	"github.com/openrfsense/backend/database/models"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/openrfsense/backend/database"
 )
 
 // List campaigns
 //
 // @summary     List campaigns
-// @description Returns a list of all recorded campaigns (that were successfully started).
+// @description Returns a list of campaigns that were successfully started. Will return all campaigns unless either of the query parameters is set.
 // @tags        data
 // @security    BasicAuth
+// @param       sensors    path string false "Matches campigns which contain ALL these sensors as a comma-separated list."
+// @param       campaignId path string false "Matches a single campaign by its unique ID."
 // @produce     json
 // @success     200 {array} database.Campaign "All recorded campaigns"
 // @failure     500 "Generally a database error"
 // @router      /campaigns [get]
 func CampaignsGet(ctx *fiber.Ctx) error {
-	campaigns := []database.Campaign{}
-	err := database.Instance().Find(&campaigns).Error
+	campaignId := ctx.Query("campaignId")
+	sensors := ctx.Query("sensors")
+
+	builder := database.Instance().Select("*").From("campaigns")
+	if len(campaignId) > 0 {
+		builder = builder.Where("campaign_id = ?", campaignId)
+	}
+
+	if len(sensors) > 0 {
+		builder = builder.Where("sensors @> ?", strings.Split(sensors, ","))
+	}
+
+	sql, args, _ := builder.ToSql()
+	campaigns, err := database.Multiple[models.Campaign](
+		context.Background(),
+		sql,
+		args...,
+	)
+	if len(campaigns) == 0 {
+		return ctx.JSON(campaigns)
+	}
 	if err != nil {
-		log.Error(err)
 		return err
 	}
 
 	return ctx.JSON(campaigns)
-}
-
-// Get a single campaign object
-//
-// @summary     Get a single campaign object
-// @description Returns the campaign object corresponding to the given unique ID.
-// @tags        data
-// @security    BasicAuth
-// @produce     json
-// @success     200 {object} database.Campaign "The campaign with the given ID"
-// @failure     500 "Generally a database error"
-// @router      /campaigns/{campaign_id} [get]
-func CampaignGet(ctx *fiber.Ctx) error {
-	id := ctx.Params("campaign_id")
-	if id == "" {
-		return ctx.SendStatus(http.StatusBadRequest)
-	}
-
-	campaign := database.Campaign{}
-	err := database.Instance().
-		First(&campaign, "campaign_id = ?", id).
-		Error
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	return ctx.JSON(campaign)
-}
-
-// Get all samples recorded during a specific campaign
-//
-// @summary     Get all samples recorded during a specific campaign
-// @description Returns a list of all the samples recorded during a campaign by the sensors partaking in said campaign.
-// @tags        data
-// @security    BasicAuth
-// @produce     json
-// @success     200 {array} database.Sample "All samples received during the campaign"
-// @failure     500 "Generally a database error"
-// @router      /campaigns/{campaign_id}/samples [get]
-func CampaignSamplesGet(ctx *fiber.Ctx) error {
-	id := ctx.Params("campaign_id")
-	if id == "" {
-		return ctx.SendStatus(http.StatusBadRequest)
-	}
-
-	campaign := database.Campaign{}
-	err := database.Instance().First(&campaign, "campaign_id = ?", id).Error
-	if err != nil {
-		log.Error(err)
-		return ctx.SendStatus(http.StatusInternalServerError)
-	}
-
-	samples := []database.Sample{}
-	err = database.Instance().
-		Where("campaign_id = ?", campaign.CampaignId).
-		Find(&samples).
-		Error
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	return ctx.JSON(samples)
 }

@@ -52,6 +52,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer database.Close()
 
 	log.Info("Starting NATS server")
 	err = nats.Start(konfig)

@@ -4,18 +4,19 @@ import (
 	"net"
 	"testing"
 
+	"github.com/openrfsense/backend/database/models"
+
 	"github.com/hamba/avro/v2"
-	"github.com/openrfsense/backend/database"
 )
 
-var avroPacket = database.Sample{
-	SensorID:   "sensor",
+var avroPacket = models.Sample{
+	SensorId:   "sensor",
 	CampaignId: "campaign",
 	SampleType: "PSD",
-	Config: database.SampleConfig{
+	SampleConfig: models.SampleConfig{
 		CenterFreq: 0,
 	},
-	Time: database.SampleTime{
+	SampleTime: models.SampleTime{
 		Seconds:      0,
 		Microseconds: 0,
 	},
@@ -42,5 +43,13 @@ func TestHandleRequest(t *testing.T) {
 
 	if _, err := conn.Write(bin); err != nil {
 		t.Error("could not write payload to TCP server:", err)
+	}
+
+	select {
+	case err = <-errors:
+		if err != nil {
+			t.Fatal(err)
+		}
+	default:
 	}
 }

@@ -36,7 +36,6 @@ var swaggerConfig = swagger.Config{
 	DeepLinking:              true,
 	DefaultModelsExpandDepth: 2,
 	DefaultModelExpandDepth:  2,
-	DefaultModelRendering:    "model",
 	DocExpansion:             "list",
 	SyntaxHighlight: &swagger.SyntaxHighlightConfig{
 		Activate: true,
@@ -80,13 +79,9 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 			}),
 		)
 		router.Get("/campaigns", CampaignsGet)
-		router.Get("/campaigns/:campaign_id", CampaignGet)
-		router.Get("/campaigns/:campaign_id/samples", CampaignSamplesGet)
-		router.Get("/nodes/:sensor_id/stats", NodeStatsGet)
-		router.Get("/nodes/:sensor_id/campaigns", NodeCampaignsGet)
-		router.Get("/nodes/:sensor_id/campaigns/:campaign_id", NodeCampaignSamplesGet)
-		router.Get("/nodes/:sensor_id/samples", NodeSamplesGet)
+		router.Get("/samples", SamplesGet)
 		router.Get("/nodes", NodesGet)
+		router.Get("/nodes/:sensor_id", NodeGet)
 		router.Post("/aggregated", AggregatedPost)
 		router.Post("/raw", RawPost)
 	})

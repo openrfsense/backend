@@ -15,9 +15,11 @@ import (
 // @description Sends an aggregated measurement request to the nodes specified in `sensors` and returns a list of `stats.Stats` objects for all sensors taking part in the campaign. Will time out in `300ms` if any sensor does not respond.
 // @tags        measurement
 // @security    BasicAuth
+// @accept      json
 // @param       id body types.AggregatedMeasurementRequest true "Measurement request object"
 // @produce     json
-// @success     200 {array} stats.Stats "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information."
+// @success     201 {array}  stats.Stats "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information."
+// @header      201 {string} Location    "Location of the new campaign object."
 // @failure     500 "When the internal timeout for information retrieval expires"
 // @router      /aggregated [post]
 func AggregatedPost(ctx *fiber.Ctx) error {
@@ -44,20 +46,20 @@ func AggregatedPost(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	campaign := &database.Campaign{
-		CampaignId: amr.CampaignId,
-		Sensors:    amr.Sensors,
-		Type:       "PSD",
-		Begin:      amr.Begin,
-		End:        amr.End,
-	}
-	err = database.Instance().Create(campaign).Error
+	err = database.Do(
+		ctx.Context(),
+		`insert into campaigns ("campaign_id", "sensors", "type", "begin", "end") values ($1, $2, 'PSD', $3, $4)`,
+		amr.CampaignId,
+		amr.Sensors,
+		amr.Begin,
+		amr.End,
+	)
 	if err != nil {
-		log.Error(err)
 		return err
 	}
 
-	return ctx.JSON(statsAll)
+	ctx.Set("Location", "/campaigns?campaignId="+amr.CampaignId)
+	return ctx.Status(fiber.StatusCreated).JSON(statsAll)
 }
 
 // Starts a measurement on a node and returns the raw spectrum measurement
@@ -66,9 +68,11 @@ func AggregatedPost(ctx *fiber.Ctx) error {
 // @description Sends a raw measurement request to the nodes specified in `sensors` and returns a list of `stats.Stats` objects for all sensors taking part in the campaign. Will time out in `300ms` if any sensor does not respond.
 // @tags        measurement
 // @security    BasicAuth
+// @accept      json
 // @param       id body types.RawMeasurementRequest true "Measurement request object"
 // @produce     json
-// @success     200 {array} stats.Stats "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information."
+// @success     201 {array}  stats.Stats "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information."
+// @header      201 {string} Location    "Location of the new campaign object."
 // @failure     500 "When the internal timeout for information retrieval expires"
 // @router      /raw [post]
 func RawPost(ctx *fiber.Ctx) error {
@@ -95,18 +99,18 @@ func RawPost(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	campaign := &database.Campaign{
-		CampaignId: rmr.CampaignId,
-		Sensors:    rmr.Sensors,
-		Type:       "IQ",
-		Begin:      rmr.Begin,
-		End:        rmr.End,
-	}
-	err = database.Instance().Create(campaign).Error
+	err = database.Do(
+		ctx.Context(),
+		`insert into campaigns ("campaign_id", "sensors", "type", "begin", "end") values ($1, $2, 'IQ', $3, $4)`,
+		rmr.CampaignId,
+		rmr.Sensors,
+		rmr.Begin,
+		rmr.End,
+	)
 	if err != nil {
-		log.Error(err)
 		return err
 	}
 
-	return ctx.JSON(statsAll)
+	ctx.Set("Location", "/campaigns?campaignId="+rmr.CampaignId)
+	return ctx.Status(fiber.StatusCreated).JSON(statsAll)
 }

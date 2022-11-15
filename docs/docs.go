@@ -31,6 +31,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Sends an aggregated measurement request to the nodes specified in ` + "`" + `sensors` + "`" + ` and returns a list of ` + "`" + `stats.Stats` + "`" + ` objects for all sensors taking part in the campaign. Will time out in ` + "`" + `300ms` + "`" + ` if any sensor does not respond.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -50,12 +53,18 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information.",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/stats.Stats"
+                            }
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "Location of the campaign object."
                             }
                         }
                     },
@@ -96,65 +105,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/campaigns/{campaign_id}": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Returns the campaign object corresponding to the given unique ID.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Get a single campaign object",
-                "responses": {
-                    "200": {
-                        "description": "The campaign with the given ID",
-                        "schema": {
-                            "$ref": "#/definitions/database.Campaign"
-                        }
-                    },
-                    "500": {
-                        "description": "Generally a database error"
-                    }
-                }
-            }
-        },
-        "/campaigns/{campaign_id}/samples": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Returns a list of all the samples recorded during a campaign by the sensors partaking in said campaign.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Get all samples recorded during a specific campaign",
-                "responses": {
-                    "200": {
-                        "description": "All samples received during the campaign",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/database.Sample"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Generally a database error"
-                    }
-                }
-            }
-        },
         "/nodes": {
             "get": {
                 "security": [
@@ -178,6 +128,43 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/stats.Stats"
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "When the internal timeout for information retrieval expires"
+                    }
+                }
+            }
+        },
+        "/nodes/{sensor_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns full stats from the node with given hardware ID. Will time out in ` + "`" + `300ms` + "`" + ` if the node does not respond.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "administration"
+                ],
+                "summary": "Get stats from a node",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Node hardware ID",
+                        "name": "sensor_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Full system statistics for the node associated to the given ID",
+                        "schema": {
+                            "$ref": "#/definitions/stats.Stats"
                         }
                     },
                     "500": {
@@ -273,83 +260,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/nodes/{sensor_id}/samples": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Returns all samples received by the backend from the sensor with the given ID.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Get all samples received from a specific node",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Node hardware ID",
-                        "name": "sensor_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of samples received by the given sensor",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/database.Sample"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Generally a database error"
-                    }
-                }
-            }
-        },
-        "/nodes/{sensor_id}/stats": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Returns full stats from the node with given hardware ID. Will time out in ` + "`" + `300ms` + "`" + ` if the node does not respond.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "administration"
-                ],
-                "summary": "Get stats from a node",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Node hardware ID",
-                        "name": "sensor_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Full system statistics for the node associated to the given ID",
-                        "schema": {
-                            "$ref": "#/definitions/stats.Stats"
-                        }
-                    },
-                    "500": {
-                        "description": "When the internal timeout for information retrieval expires"
-                    }
-                }
-            }
-        },
         "/raw": {
             "post": {
                 "security": [
@@ -358,6 +268,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Sends a raw measurement request to the nodes specified in ` + "`" + `sensors` + "`" + ` and returns a list of ` + "`" + `stats.Stats` + "`" + ` objects for all sensors taking part in the campaign. Will time out in ` + "`" + `300ms` + "`" + ` if any sensor does not respond.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -391,6 +304,65 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/samples": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns a list of all the samples recorded during a campaign by a specific sensors partaking in said campaign.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "Get samples",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sensor which the samples belong to",
+                        "name": "sensorId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Campaign which the samples belong to",
+                        "name": "campaignId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Samples returned will have been received strictly later than this date (must be in ISO 8601/RFC 3339)",
+                        "name": "from",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Samples returned will have been received strictly before this date (must be in ISO 8601/RFC 3339)",
+                        "name": "to",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All samples which respect the given conditions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Sample"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Generally a database error"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -408,9 +380,6 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "type": "string"
-                },
                 "end": {
                     "description": "The time at which the campaign will end",
                     "type": "string"
@@ -425,22 +394,30 @@ const docTemplate = `{
                 "type": {
                     "description": "The type of measurements requested",
                     "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
                 }
             }
         },
         "database.Sample": {
             "type": "object",
             "properties": {
+                "Time": {
+                    "type": "string"
+                },
+                "antennaGain": {
+                    "description": "Antenna gain in dBi",
+                    "type": "number"
+                },
+                "antennaId": {
+                    "description": "Identifier for the antenna being used if device has multiple antennas",
+                    "type": "integer"
+                },
                 "campaignId": {
                     "description": "Unique identifier for the campaign this sample belongs to",
                     "type": "string"
                 },
-                "config": {
-                    "description": "Sensor configuration for the recorded data set",
-                    "$ref": "#/definitions/database.SampleConfig"
+                "centerFreq": {
+                    "description": "Center frequency in Hz to which the RF front-end was tuned to while recording the associated spectrum data",
+                    "type": "integer"
                 },
                 "createdAt": {
                     "type": "string"
@@ -451,41 +428,6 @@ const docTemplate = `{
                     "items": {
                         "type": "number"
                     }
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
-                "sampleType": {
-                    "description": "Sample type string (IQ, PSD, DEC)",
-                    "type": "string"
-                },
-                "sensorId": {
-                    "description": "The unique hardware id of the sensor",
-                    "type": "string"
-                },
-                "time": {
-                    "description": "Sample timestamp with microseconds precision",
-                    "$ref": "#/definitions/database.SampleTime"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.SampleConfig": {
-            "type": "object",
-            "properties": {
-                "antennaGain": {
-                    "description": "Antenna gain in dBi",
-                    "type": "number"
-                },
-                "antennaId": {
-                    "description": "Identifier for the antenna being used if device has multiple antennas",
-                    "type": "integer"
-                },
-                "centerFreq": {
-                    "description": "Center frequency in Hz to which the RF front-end was tuned to while recording the associated spectrum data",
-                    "type": "integer"
                 },
                 "estNoiseFloor": {
                     "description": "Estimated noise floor in dB",
@@ -516,9 +458,17 @@ const docTemplate = `{
                     "description": "Time synchronization of the radio frontend (0: none, 1: GPS, 2: Reference Clock, 5: Other)",
                     "type": "integer"
                 },
+                "sampleType": {
+                    "description": "Sample type string (IQ, PSD, DEC)",
+                    "type": "string"
+                },
                 "samplingRate": {
                     "description": "Sensor's sampling rate in samples per second",
                     "type": "integer"
+                },
+                "sensorId": {
+                    "description": "The unique hardware id of the sensor",
+                    "type": "string"
                 },
                 "sigStrengthCalibration": {
                     "description": "True if signal strength is calibrated",
@@ -527,19 +477,6 @@ const docTemplate = `{
                 "systemSync": {
                     "description": "Time synchronization of the system (0: none, 1: GPS, 2: Reference Clock, 3: NTP, 4: OpenSky, 5: Other)",
                     "type": "string"
-                }
-            }
-        },
-        "database.SampleTime": {
-            "type": "object",
-            "properties": {
-                "microseconds": {
-                    "description": "Microseconds extension for the UNIX time stamp",
-                    "type": "integer"
-                },
-                "seconds": {
-                    "description": "Number of seconds since the UNIX epoch start on January 1st, 1970 at UTC",
-                    "type": "integer"
                 }
             }
         },
@@ -573,16 +510,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "begin": {
-                    "description": "Start time in Unix epoch (seconds elapsed since January 1, 1970 UTC)",
-                    "type": "integer"
+                    "description": "Start time in ISO 8601",
+                    "type": "string"
                 },
                 "campaignId": {
                     "description": "Campaign ID. For internal use only, will be ignored if not null",
                     "type": "string"
                 },
                 "end": {
-                    "description": "End time in Unix epoch (seconds elapsed since January 1, 1970 UTC)",
-                    "type": "integer"
+                    "description": "End time in ISO 8601",
+                    "type": "string"
                 },
                 "freqMax": {
                     "description": "Upper bound for frequency in Hz",
@@ -613,16 +550,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "begin": {
-                    "description": "Start time in Unix epoch (seconds elapsed since January 1, 1970 UTC)",
-                    "type": "integer"
+                    "description": "Start time in ISO 8601",
+                    "type": "string"
                 },
                 "campaignId": {
                     "description": "Campaign ID. For internal use only, will be ignored if not null",
                     "type": "string"
                 },
                 "end": {
-                    "description": "End time in Unix epoch (seconds elapsed since January 1, 1970 UTC)",
-                    "type": "integer"
+                    "description": "End time in ISO 8601",
+                    "type": "string"
                 },
                 "freqCenter": {
                     "description": "Center frequency for measurement",

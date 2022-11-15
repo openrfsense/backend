@@ -1,14 +1,15 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/openrfsense/common/logging"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/knadh/koanf"
 )
 
@@ -17,35 +18,70 @@ var log = logging.New().
 	WithLevel(logging.DebugLevel).
 	WithFlags(logging.FlagsDevelopment)
 
-var pg *gorm.DB
+const (
+	maxPoolSize        = 100
+	connectionAttempts = 10
+	connectionTimeout  = time.Second
+)
+
+var pg *Postgres
+
+// Type Postgres contains a database connection pool and a query builder.
+type Postgres struct {
+	maxPoolSize  int
+	connAttempts int
+	connTimeout  time.Duration
+
+	squirrel.StatementBuilderType
+	*pgxpool.Pool
+}
 
 // Initalizes a connection to a PostgreSQL database.
 func Init(config *koanf.Koanf) error {
-	var err error
-	conn := postgres.Open(generateConnString(config))
-	// Force timestamps to UTC
-	pg, err = gorm.Open(conn, &gorm.Config{
-		NowFunc: time.Now().UTC,
-	})
+	pg = &Postgres{
+		maxPoolSize:  maxPoolSize,
+		connAttempts: connectionAttempts,
+		connTimeout:  connectionTimeout,
+	}
+
+	pg.StatementBuilderType = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+
+	poolConfig, err := pgxpool.ParseConfig(generateConnString(config))
+	if err != nil {
+		return err
+	}
+	poolConfig.MaxConns = int32(pg.maxPoolSize)
+
+	ticker := time.NewTicker(pg.connTimeout)
+	defer ticker.Stop()
+	for pg.connAttempts > 0 {
+		pg.Pool, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
+		if err == nil {
+			break
+		}
+
+		log.Debugf("Postgres is trying to connect, attempts left: %d", pg.connAttempts)
+		// time.Sleep(pg.connTimeout)
+		<-ticker.C
+		pg.connAttempts--
+	}
+
 	if err != nil {
 		return err
 	}
 
-	err = pg.AutoMigrate(
-		&Campaign{},
-		&Sample{},
-	)
-	if err != nil {
-		return err
-	}
-
-	log.Debug("Connected to Postgres DB")
-
-	return nil
+	return autoMigrate(config)
 }
 
-// Returns a reference to the internal databse connection.
-func Instance() *gorm.DB {
+// Closes the database connection.
+func Close() {
+	if pg.Pool != nil {
+		pg.Pool.Close()
+	}
+}
+
+// Returns a reference to the internal database connection and query builder.
+func Instance() *Postgres {
 	return pg
 }
 
