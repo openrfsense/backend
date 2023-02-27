@@ -14,6 +14,7 @@ import (
 type Backend struct {
 	Metrics bool              `yaml:"metrics"`
 	Port    int               `yaml:"port"`
+	Storage string            `yaml:"storage"`
 	Users   map[string]string `yaml:"users"`
 }
 
@@ -48,6 +49,7 @@ var defaultConfig = BackendConfig{
 	Backend: Backend{
 		Metrics: true,
 		Port:    8080,
+		Storage: "/samples",
 	},
 	Collector: Collector{
 		Port: 2022,
