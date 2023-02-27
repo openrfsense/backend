@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"html/template"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,13 +14,7 @@ import (
 	"github.com/knadh/koanf"
 
 	_ "github.com/openrfsense/backend/docs"
-	"github.com/openrfsense/common/logging"
 )
-
-var log = logging.New().
-	WithPrefix("api").
-	WithLevel(logging.DebugLevel).
-	WithFlags(logging.FlagsDevelopment)
 
 var swaggerConfig = swagger.Config{
 	Title:  "OpenRFSense API",
@@ -57,10 +50,8 @@ var swaggerConfig = swagger.Config{
 
 // Creates a router for the public API. Initializes all REST endpoints under the given prefix
 // and servers swagger documentation on /swagger.
-func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fiber.App {
+func Init(config *koanf.Koanf, router *fiber.App, prefix string) {
 	creds := config.MustStringMap("backend.users")
-
-	router := fiber.New(routerConfig...)
 
 	// TODO: rate limiting?
 	router.Use(
@@ -71,7 +62,6 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 
 	// Backend router for /api/v1
 	router.Route(prefix, func(router fiber.Router) {
-		// TODO: pass auth to UI or just rate limit these for unauthenticated requests
 		router.Use(
 			logger.New(),
 			basicauth.New(basicauth.Config{
@@ -93,14 +83,4 @@ func Start(config *koanf.Koanf, prefix string, routerConfig ...fiber.Config) *fi
 	if config.Bool("backend.metrics") {
 		router.Get("/metrics", monitor.New())
 	}
-
-	addr := fmt.Sprintf(":%d", config.MustInt("backend.port"))
-
-	go func() {
-		if err := router.Listen(addr); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	return router
 }

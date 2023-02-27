@@ -19,7 +19,7 @@ import (
 // @param       sensors    path string false "Matches campigns which contain ALL these sensors as a comma-separated list."
 // @param       campaignId path string false "Matches a single campaign by its unique ID."
 // @produce     json
-// @success     200 {array} database.Campaign "All recorded campaigns"
+// @success     200 {array} models.Campaign "All recorded campaigns which match the given parameters"
 // @failure     500 "Generally a database error"
 // @router      /campaigns [get]
 func CampaignsGet(ctx *fiber.Ctx) error {

@@ -2,6 +2,8 @@
 backend:
   # Port on which to serve the API
   port: 8081
+  # BadgerDB directory for radio samples
+  storage: /samples
   # List of users as 'username: password' pairs for basic auth on the HTTP API endpoints
   users:
     openrfsense: openrfsense

@@ -1,6 +1,6 @@
 basePath: /api/v1
 definitions:
-  database.Campaign:
+  models.Campaign:
     properties:
       begin:
         description: The time at which the campaign is supposed to start
@@ -22,24 +22,14 @@ definitions:
         description: The type of measurements requested
         type: string
     type: object
-  database.Sample:
+  models.Sample:
     properties:
-      Time:
-        type: string
-      antennaGain:
-        description: Antenna gain in dBi
-        type: number
-      antennaId:
-        description: Identifier for the antenna being used if device has multiple
-          antennas
-        type: integer
       campaignId:
         description: Unique identifier for the campaign this sample belongs to
         type: string
-      centerFreq:
-        description: Center frequency in Hz to which the RF front-end was tuned to
-          while recording the associated spectrum data
-        type: integer
+      config:
+        $ref: '#/definitions/models.SampleConfig'
+        description: Sensor configuration for the recorded data set
       createdAt:
         type: string
       data:
@@ -47,6 +37,29 @@ definitions:
         items:
           type: number
         type: array
+      sampleType:
+        description: Sample type string (IQ, PSD, DEC)
+        type: string
+      sensorId:
+        description: The unique hardware id of the sensor
+        type: string
+      time:
+        $ref: '#/definitions/models.SampleTime'
+        description: Sample timestamp with microseconds precision
+    type: object
+  models.SampleConfig:
+    properties:
+      antennaGain:
+        description: Antenna gain in dBi
+        type: number
+      antennaId:
+        description: Identifier for the antenna being used if device has multiple
+          antennas
+        type: integer
+      centerFreq:
+        description: Center frequency in Hz to which the RF front-end was tuned to
+          while recording the associated spectrum data
+        type: integer
       estNoiseFloor:
         description: Estimated noise floor in dB
         type: number
@@ -72,15 +85,9 @@ definitions:
         description: 'Time synchronization of the radio frontend (0: none, 1: GPS,
           2: Reference Clock, 5: Other)'
         type: integer
-      sampleType:
-        description: Sample type string (IQ, PSD, DEC)
-        type: string
       samplingRate:
         description: Sensor's sampling rate in samples per second
         type: integer
-      sensorId:
-        description: The unique hardware id of the sensor
-        type: string
       sigStrengthCalibration:
         description: True if signal strength is calibrated
         type: boolean
@@ -88,6 +95,16 @@ definitions:
         description: 'Time synchronization of the system (0: none, 1: GPS, 2: Reference
           Clock, 3: NTP, 4: OpenSky, 5: Other)'
         type: string
+    type: object
+  models.SampleTime:
+    properties:
+      microseconds:
+        description: Microseconds extension for the UNIX time stamp
+        type: integer
+      seconds:
+        description: Number of seconds since the UNIX epoch start on January 1st,
+          1970 at UTC
+        type: integer
     type: object
   stats.Stats:
     properties:
@@ -190,7 +207,7 @@ paths:
             Will always include sensor status information.
           headers:
             Location:
-              description: Location of the campaign object.
+              description: Location of the new campaign object.
               type: string
           schema:
             items:
@@ -205,16 +222,26 @@ paths:
       - measurement
   /campaigns:
     get:
-      description: Returns a list of all recorded campaigns (that were successfully
-        started).
+      description: Returns a list of campaigns that were successfully started. Will
+        return all campaigns unless either of the query parameters is set.
+      parameters:
+      - description: Matches campigns which contain ALL these sensors as a comma-separated
+          list.
+        in: path
+        name: sensors
+        type: string
+      - description: Matches a single campaign by its unique ID.
+        in: path
+        name: campaignId
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: All recorded campaigns
+          description: All recorded campaigns which match the given parameters
           schema:
             items:
-              $ref: '#/definitions/database.Campaign'
+              $ref: '#/definitions/models.Campaign'
             type: array
         "500":
           description: Generally a database error
@@ -226,7 +253,7 @@ paths:
   /nodes:
     get:
       description: Returns a list of all connected nodes by their hardware ID. Will
-        time out in 300ms if any one of the nodes does not respond.
+        time out in `300ms` if any one of the nodes does not respond.
       produces:
       - application/json
       responses:
@@ -268,65 +295,6 @@ paths:
       summary: Get stats from a node
       tags:
       - administration
-  /nodes/{sensor_id}/campaigns:
-    get:
-      description: Returns all campaigns where the given sensor was requested to take
-        part in.
-      parameters:
-      - description: Node hardware ID
-        in: path
-        name: sensor_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of campaign the sensor took part in
-          schema:
-            items:
-              $ref: '#/definitions/database.Campaign'
-            type: array
-        "500":
-          description: Generally a database error
-      security:
-      - BasicAuth: []
-      summary: Get all campaigns a specific node took part in
-      tags:
-      - data
-  /nodes/{sensor_id}/campaigns/{campaign_id}:
-    get:
-      description: Returns all samples received by the given sensor and belonging
-        to the given campaign.
-      parameters:
-      - description: Node hardware ID
-        in: path
-        name: sensor_id
-        required: true
-        type: string
-      - description: Campaign ID
-        in: path
-        name: campaign_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of samples received by the given sensor during the given
-            campaign
-          schema:
-            items:
-              $ref: '#/definitions/database.Sample'
-            type: array
-        "500":
-          description: Generally a database error
-      security:
-      - BasicAuth: []
-      summary: Get all samples received from a specific sensor and belonging to a
-        specific campaign
-      tags:
-      - data
   /raw:
     post:
       consumes:
@@ -344,9 +312,13 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "201":
           description: Bare statistics for all nodes in the measurement campaign.
             Will always include sensor status information.
+          headers:
+            Location:
+              description: Location of the new campaign object.
+              type: string
           schema:
             items:
               $ref: '#/definitions/stats.Stats'
@@ -390,7 +362,7 @@ paths:
           description: All samples which respect the given conditions
           schema:
             items:
-              $ref: '#/definitions/database.Sample'
+              $ref: '#/definitions/models.Sample'
             type: array
         "500":
           description: Generally a database error

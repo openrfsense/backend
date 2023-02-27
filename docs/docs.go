@@ -64,7 +64,7 @@ const docTemplate = `{
                         "headers": {
                             "Location": {
                                 "type": "string",
-                                "description": "Location of the campaign object."
+                                "description": "Location of the new campaign object."
                             }
                         }
                     },
@@ -81,7 +81,7 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
-                "description": "Returns a list of all recorded campaigns (that were successfully started).",
+                "description": "Returns a list of campaigns that were successfully started. Will return all campaigns unless either of the query parameters is set.",
                 "produces": [
                     "application/json"
                 ],
@@ -89,13 +89,27 @@ const docTemplate = `{
                     "data"
                 ],
                 "summary": "List campaigns",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Matches campigns which contain ALL these sensors as a comma-separated list.",
+                        "name": "sensors",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Matches a single campaign by its unique ID.",
+                        "name": "campaignId",
+                        "in": "path"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "All recorded campaigns",
+                        "description": "All recorded campaigns which match the given parameters",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/database.Campaign"
+                                "$ref": "#/definitions/models.Campaign"
                             }
                         }
                     },
@@ -112,7 +126,7 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
-                "description": "Returns a list of all connected nodes by their hardware ID. Will time out in 300ms if any one of the nodes does not respond.",
+                "description": "Returns a list of all connected nodes by their hardware ID. Will time out in ` + "`" + `300ms` + "`" + ` if any one of the nodes does not respond.",
                 "produces": [
                     "application/json"
                 ],
@@ -173,93 +187,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/nodes/{sensor_id}/campaigns": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Returns all campaigns where the given sensor was requested to take part in.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Get all campaigns a specific node took part in",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Node hardware ID",
-                        "name": "sensor_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of campaign the sensor took part in",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/database.Campaign"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Generally a database error"
-                    }
-                }
-            }
-        },
-        "/nodes/{sensor_id}/campaigns/{campaign_id}": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Returns all samples received by the given sensor and belonging to the given campaign.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Get all samples received from a specific sensor and belonging to a specific campaign",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Node hardware ID",
-                        "name": "sensor_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Campaign ID",
-                        "name": "campaign_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of samples received by the given sensor during the given campaign",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/database.Sample"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Generally a database error"
-                    }
-                }
-            }
-        },
         "/raw": {
             "post": {
                 "security": [
@@ -290,12 +217,18 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Bare statistics for all nodes in the measurement campaign. Will always include sensor status information.",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/stats.Stats"
+                            }
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "Location of the new campaign object."
                             }
                         }
                     },
@@ -354,7 +287,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/database.Sample"
+                                "$ref": "#/definitions/models.Sample"
                             }
                         }
                     },
@@ -366,7 +299,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "database.Campaign": {
+        "models.Campaign": {
             "type": "object",
             "properties": {
                 "begin": {
@@ -397,27 +330,16 @@ const docTemplate = `{
                 }
             }
         },
-        "database.Sample": {
+        "models.Sample": {
             "type": "object",
             "properties": {
-                "Time": {
-                    "type": "string"
-                },
-                "antennaGain": {
-                    "description": "Antenna gain in dBi",
-                    "type": "number"
-                },
-                "antennaId": {
-                    "description": "Identifier for the antenna being used if device has multiple antennas",
-                    "type": "integer"
-                },
                 "campaignId": {
                     "description": "Unique identifier for the campaign this sample belongs to",
                     "type": "string"
                 },
-                "centerFreq": {
-                    "description": "Center frequency in Hz to which the RF front-end was tuned to while recording the associated spectrum data",
-                    "type": "integer"
+                "config": {
+                    "description": "Sensor configuration for the recorded data set",
+                    "$ref": "#/definitions/models.SampleConfig"
                 },
                 "createdAt": {
                     "type": "string"
@@ -428,6 +350,35 @@ const docTemplate = `{
                     "items": {
                         "type": "number"
                     }
+                },
+                "sampleType": {
+                    "description": "Sample type string (IQ, PSD, DEC)",
+                    "type": "string"
+                },
+                "sensorId": {
+                    "description": "The unique hardware id of the sensor",
+                    "type": "string"
+                },
+                "time": {
+                    "description": "Sample timestamp with microseconds precision",
+                    "$ref": "#/definitions/models.SampleTime"
+                }
+            }
+        },
+        "models.SampleConfig": {
+            "type": "object",
+            "properties": {
+                "antennaGain": {
+                    "description": "Antenna gain in dBi",
+                    "type": "number"
+                },
+                "antennaId": {
+                    "description": "Identifier for the antenna being used if device has multiple antennas",
+                    "type": "integer"
+                },
+                "centerFreq": {
+                    "description": "Center frequency in Hz to which the RF front-end was tuned to while recording the associated spectrum data",
+                    "type": "integer"
                 },
                 "estNoiseFloor": {
                     "description": "Estimated noise floor in dB",
@@ -458,17 +409,9 @@ const docTemplate = `{
                     "description": "Time synchronization of the radio frontend (0: none, 1: GPS, 2: Reference Clock, 5: Other)",
                     "type": "integer"
                 },
-                "sampleType": {
-                    "description": "Sample type string (IQ, PSD, DEC)",
-                    "type": "string"
-                },
                 "samplingRate": {
                     "description": "Sensor's sampling rate in samples per second",
                     "type": "integer"
-                },
-                "sensorId": {
-                    "description": "The unique hardware id of the sensor",
-                    "type": "string"
                 },
                 "sigStrengthCalibration": {
                     "description": "True if signal strength is calibrated",
@@ -477,6 +420,19 @@ const docTemplate = `{
                 "systemSync": {
                     "description": "Time synchronization of the system (0: none, 1: GPS, 2: Reference Clock, 3: NTP, 4: OpenSky, 5: Other)",
                     "type": "string"
+                }
+            }
+        },
+        "models.SampleTime": {
+            "type": "object",
+            "properties": {
+                "microseconds": {
+                    "description": "Microseconds extension for the UNIX time stamp",
+                    "type": "integer"
+                },
+                "seconds": {
+                    "description": "Number of seconds since the UNIX epoch start on January 1st, 1970 at UTC",
+                    "type": "integer"
                 }
             }
         },

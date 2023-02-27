@@ -38,7 +38,7 @@ func NodesGet(ctx *fiber.Ctx) error {
 // @description Returns full stats from the node with given hardware ID. Will time out in `300ms` if the node does not respond.
 // @tags        administration
 // @security    BasicAuth
-// @param       sensor_id   path string true "Node hardware ID"
+// @param       sensor_id path string true "Node hardware ID"
 // @produce     json
 // @success     200 {object} stats.Stats "Full system statistics for the node associated to the given ID"
 // @failure     500 "When the internal timeout for information retrieval expires"
