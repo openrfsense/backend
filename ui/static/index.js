@@ -107,22 +107,16 @@ var map = L.map("map", {
 })
 map.setMaxBounds([[-85.0511, -180], [85.0511, 180]])
 
-var center = {
-    lat: 0,
-    lon: 0
-}
+var positions = []
 // Add markers to map with simple DOM trick
-var markers = document.querySelectorAll("marker")
-markers.forEach(m => {
-    var data = m.dataset
-    L.marker([data.lat, data.lon]).addTo(map).bindPopup(m.innerHTML)
-    center.lat += Number.parseFloat(data.lat)
-    center.lon += Number.parseFloat(data.lon)
+document.querySelectorAll("marker").forEach(m => {
+    var pos = [m.dataset.lat, m.dataset.lon]
+    L.marker(pos).addTo(map).bindPopup(m.innerHTML)
+    positions.push(pos)
     m.remove()
 })
-center.lat /= markers.length
-center.lon /= markers.length
-map.setView([center.lat, center.lon], 3)
+// Center map on group of nodes positions
+map.fitBounds(positions)
 
 L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
