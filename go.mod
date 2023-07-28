@@ -11,7 +11,7 @@ require (
 	github.com/gofiber/swagger v0.1.9
 	github.com/gofiber/websocket/v2 v2.1.4
 	github.com/golang-migrate/migrate/v4 v4.15.2
-	github.com/hamba/avro/v2 v2.5.0
+	github.com/hamba/avro/v2 v2.13.0
 	github.com/jackc/pgx/v5 v5.3.0
 	github.com/lib/pq v1.10.7
 	github.com/nats-io/nats-server/v2 v2.9.14
